@@ -254,6 +254,8 @@ def _build_index_header(bottom_wcs_header, source_map: Map) -> str:
                 header["CRLN_OBS"] = float(obs_hgc.lon.to_value(u.deg))
                 header["CRLT_OBS"] = float(obs_hgc.lat.to_value(u.deg))
             except Exception:
+                # If Carrington transformation fails (e.g. unsupported observer configuration),
+                # proceed without CRLN_OBS/CRLT_OBS rather than aborting header creation.
                 # Carrington observer transforms can fail for some observer metadata;
                 # keep header generation robust and proceed with available keys.
                 pass
