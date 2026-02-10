@@ -1120,12 +1120,10 @@ class MagFieldViewer(BackgroundPlotter):
         else:
             if slice_z==0:
                 slice_z = 1.0e-6
-            use_scalar_arg = True
             if use_interp:
                 new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
                 pref = 'point'
                 scalar_name = scalar
-                use_scalar_arg = True
                 scalars = scalar_name
             else:
                 spacing_z = self.grid_spacing[2]
@@ -1156,7 +1154,6 @@ class MagFieldViewer(BackgroundPlotter):
                     new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
                     pref = 'point'
                     scalar_name = scalar
-                    use_scalar_arg = True
                     scalars = scalar_name
                     if self.bottom_slice_actor is None:
                         self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
@@ -1177,7 +1174,6 @@ class MagFieldViewer(BackgroundPlotter):
                         new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
                         pref = 'point'
                         scalar_name = scalar
-                        use_scalar_arg = True
                         scalars = scalar_name
                         if self.bottom_slice_actor is None:
                             self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
@@ -1200,7 +1196,6 @@ class MagFieldViewer(BackgroundPlotter):
                 new_slice.cell_data[scalar_name] = flat_slice
                 new_slice.set_active_scalars(scalar_name, preference='cell')
                 pref = 'cell'
-                use_scalar_arg = True
                 scalars = scalar_name
             if self.bottom_slice_actor is None:
                 self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel, QLineEd
                              QCalendarWidget, QTextEdit, QMessageBox, QDockWidget, QToolButton, QMenu,
                              QFileDialog)
 from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import QSize, QDateTime, Qt, QTimer
+from PyQt5.QtCore import QDateTime, Qt, QTimer
 from PyQt5 import uic
 
 from pyampp.util.config import *

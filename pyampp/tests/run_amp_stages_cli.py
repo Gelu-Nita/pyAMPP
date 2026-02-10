@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from pathlib import Path
 from typing import Dict, Any
@@ -16,7 +15,6 @@ import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
-from sunpy.coordinates import frames
 import sunpy.map
 from sunpy.sun import constants as sun_consts
 from sunpy.map import all_coordinates_from_map
@@ -43,7 +41,7 @@ def cutout2box(_map, center_crd: SkyCoord, dx_km, shape):
     box_header = sunpy.map.make_fitswcs_header(shape, origin,
                                                projection_code='CEA', scale=scale)
 
-    outmap = _map.reproject_to(box_header, algorithm="adaptive", roundtrip_coords=False)
+    outmap = _map.reproject_to(box_header, algorithm="exact")
     return outmap
 
 

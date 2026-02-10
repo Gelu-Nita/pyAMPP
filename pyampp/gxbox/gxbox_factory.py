@@ -82,6 +82,8 @@ def _build_index_header(bottom_wcs_header, source_map: Map) -> str:
                 header["CRLN_OBS"] = float(obs_hgc.lon.to_value(u.deg))
                 header["CRLT_OBS"] = float(obs_hgc.lat.to_value(u.deg))
             except Exception:
+                # Carrington observer transforms can fail for some observer metadata;
+                # keep header generation robust and proceed with available keys.
                 pass
 
         if getattr(source_map, "rsun_meters", None) is not None:
@@ -360,9 +362,9 @@ class GxBox(QMainWindow):
         map_bz = self.loadmap("br")
         map_bx = -self.loadmap("bt")
         map_by = self.loadmap("bp")
-        map_bz = map_bz.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-        map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-        map_by = map_by.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
+        map_bz = map_bz.reproject_to(self.bottom_wcs_header, algorithm="exact")
+        map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="exact")
+        map_by = map_by.reproject_to(self.bottom_wcs_header, algorithm="exact")
         obs_dr = self.box_res.to(u.km) / self._rsun_km()
         dr3 = [obs_dr.value, obs_dr.value, obs_dr.value]
         stage_box = {
@@ -382,10 +384,10 @@ class GxBox(QMainWindow):
         map_by = self.loadmap("bp")
         map_bz = self.loadmap("br")
         map_ic = self.loadmap("continuum")
-        map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-        map_by = map_by.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-        map_bz = map_bz.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-        map_ic = map_ic.reproject_to(self.bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
+        map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="exact")
+        map_by = map_by.reproject_to(self.bottom_wcs_header, algorithm="exact")
+        map_bz = map_bz.reproject_to(self.bottom_wcs_header, algorithm="exact")
+        map_ic = map_ic.reproject_to(self.bottom_wcs_header, algorithm="exact")
         index = _build_index_header(self.bottom_wcs_header, map_bz)
         chromo_mask = decompose(map_bz.data.T, map_ic.data.T)
         self._base_cache = {

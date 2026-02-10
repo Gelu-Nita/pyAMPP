@@ -254,6 +254,8 @@ def _build_index_header(bottom_wcs_header, source_map: Map) -> str:
                 header["CRLN_OBS"] = float(obs_hgc.lon.to_value(u.deg))
                 header["CRLT_OBS"] = float(obs_hgc.lat.to_value(u.deg))
             except Exception:
+                # Carrington observer transforms can fail for some observer metadata;
+                # keep header generation robust and proceed with available keys.
                 pass
 
         if getattr(source_map, "rsun_meters", None) is not None:
@@ -383,6 +385,7 @@ def _load_hmi_maps_from_downloader(
         try:
             maps[f"AIA_{key}"] = Map(path)
         except Exception:
+            # Skip optional context channels that cannot be loaded.
             continue
     info = {"downloaded": downloaded, "elapsed": elapsed, "missing_before": missing_before}
     return maps, info
@@ -627,12 +630,12 @@ def main(
     map_by = map_bp
     map_bz = map_br
 
-    bottom_bx = map_bx.reproject_to(bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-    bottom_by = map_by.reproject_to(bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-    bottom_bz = map_bz.reproject_to(bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
+    bottom_bx = map_bx.reproject_to(bottom_wcs_header, algorithm="exact")
+    bottom_by = map_by.reproject_to(bottom_wcs_header, algorithm="exact")
+    bottom_bz = map_bz.reproject_to(bottom_wcs_header, algorithm="exact")
 
-    base_bz = map_los.reproject_to(bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
-    base_ic = map_cont.reproject_to(bottom_wcs_header, algorithm="adaptive", roundtrip_coords=False)
+    base_bz = map_los.reproject_to(bottom_wcs_header, algorithm="exact")
+    base_ic = map_cont.reproject_to(bottom_wcs_header, algorithm="exact")
 
     index = _build_index_header(bottom_wcs_header, bottom_bz)
     chromo_mask = decompose(base_bz.data.T, base_ic.data.T)

@@ -94,11 +94,6 @@ def main() -> int:
         start_dir = Path(args.start_dir).expanduser() if args.start_dir else Path.cwd()
         if not start_dir.exists() or not start_dir.is_dir():
             start_dir = Path.cwd()
-        picker_start = str(start_dir)
-        if h5_arg:
-            candidate = Path(h5_arg).expanduser()
-            if candidate.exists():
-                picker_start = str(candidate)
         dialog = QFileDialog(None, "Open HDF5 Model")
         # Native macOS picker may ignore selectFile(); use Qt dialog for reliable preselection.
         dialog.setOption(QFileDialog.DontUseNativeDialog, True)

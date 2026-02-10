@@ -13,7 +13,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib import colors
-import astropy.units as u
 import sunpy.map
 
 app = typer.Typer(help="View refmaps and base maps stored in a model HDF5 file.")
@@ -265,6 +264,7 @@ class RefmapViewer(QtWidgets.QMainWindow):
             try:
                 self.figure.colorbar(im, ax=ax, orientation="vertical", shrink=0.85, pad=0.02)
             except Exception:
+                # Colorbar rendering is cosmetic; keep viewer usable if it fails.
                 pass
         self.canvas.draw()
 
