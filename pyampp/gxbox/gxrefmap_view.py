@@ -264,6 +264,7 @@ class RefmapViewer(QtWidgets.QMainWindow):
             try:
                 self.figure.colorbar(im, ax=ax, orientation="vertical", shrink=0.85, pad=0.02)
             except Exception:
+                # Colorbar rendering is cosmetic; ignore any errors to avoid breaking the viewer.
                 # Colorbar rendering is cosmetic; keep viewer usable if it fails.
                 pass
         self.canvas.draw()
