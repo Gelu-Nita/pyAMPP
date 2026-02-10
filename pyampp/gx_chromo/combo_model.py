@@ -16,8 +16,9 @@ def combo_model_idl(bndbox, box):
 
     return combo_model(box, dr, base_bz, base_ic)
 
-def combo_model(box, dr, base_bz, base_ic):
-    chromo_mask = decompose(base_bz, base_ic)
+def combo_model(box, dr, base_bz, base_ic, chromo_mask=None):
+    if chromo_mask is None:
+        chromo_mask = decompose(base_bz, base_ic)
     chromo = populate_chromo(chromo_mask)
 
     csize = chromo['nh'].shape
