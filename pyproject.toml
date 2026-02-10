@@ -31,6 +31,11 @@ dynamic = ["version"]
 [project.scripts]
 pyampp = "pyampp.gxbox.gxampp:app"
 gxbox = "pyampp.gxbox.gxbox_factory:app"
+gxbox-view = "pyampp.gxbox.view_h5:main"
+gx-fov2box = "pyampp.gxbox.gx_fov2box:app"
+gx_fov2box = "pyampp.gxbox.gx_fov2box:app"
+h5tree = "pyampp.util.h5tree:app"
+gxrefmap-view = "pyampp.gxbox.gxrefmap_view:app"
 
 [project.optional-dependencies]
 tests = [
