@@ -530,7 +530,6 @@ class PyAmppGUI(QMainWindow):
         # --use-potential means NAS stage is skipped.
         if self.skip_nlfff_extrapolation.isChecked() and jump_action == "nlfff":
             self._set_jump_action("lines")
-            jump_action = "lines"
             jump_stage = 4
 
         use_potential = self.skip_nlfff_extrapolation.isChecked()
