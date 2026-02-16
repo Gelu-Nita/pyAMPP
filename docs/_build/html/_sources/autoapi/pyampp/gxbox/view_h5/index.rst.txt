@@ -1,0 +1,63 @@
+pyampp.gxbox.view_h5
+====================
+
+.. py:module:: pyampp.gxbox.view_h5
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   pyampp.gxbox.view_h5.PyVistaDeprecationWarning
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   pyampp.gxbox.view_h5.SimpleBox
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.gxbox.view_h5.infer_dims
+   pyampp.gxbox.view_h5.infer_time
+   pyampp.gxbox.view_h5.infer_res
+   pyampp.gxbox.view_h5.main
+
+
+Module Contents
+---------------
+
+.. py:data:: PyVistaDeprecationWarning
+
+.. py:class:: SimpleBox
+
+   .. py:attribute:: dims_pix
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: res
+      :type:  astropy.units.Quantity
+
+
+   .. py:attribute:: b3d
+      :type:  dict
+
+
+   .. py:property:: grid_coords
+
+
+.. py:function:: infer_dims(b3d: dict) -> numpy.ndarray
+
+.. py:function:: infer_time(b3d: dict) -> astropy.time.Time
+
+.. py:function:: infer_res(b3d: dict) -> astropy.units.Quantity
+
+.. py:function:: main() -> int
+

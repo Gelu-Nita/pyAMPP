@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.util.config &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyampp.util.config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyampp.util.config</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<div class="viewcode-block" id="get_base_directory">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.get_base_directory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_base_directory</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get the base directory depending on the OS. &quot;&quot;&quot;</span>
+    <span class="n">home_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home_dir</span><span class="p">,</span> <span class="s1">&#39;pyampp&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="setup_directories">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.setup_directories">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_directories</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create and return the necessary directories for the package. &quot;&quot;&quot;</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">get_base_directory</span><span class="p">()</span>
+
+    <span class="c1"># Define subdirectories within the base directory</span>
+    <span class="n">sample_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">)</span>
+    <span class="n">download_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s1">&#39;jsoc_cache&#39;</span><span class="p">)</span>
+    <span class="n">gxmodel_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s1">&#39;gx_models&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Ensure these directories exist</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">sample_data_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">download_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">gxmodel_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sample_data_dir</span><span class="p">,</span> <span class="n">download_dir</span><span class="p">,</span> <span class="n">gxmodel_dir</span></div>
+
+
+<div class="viewcode-block" id="aia_euv_passbands">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.aia_euv_passbands">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aia_euv_passbands</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the passbands for the SDO/AIA instrument. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;94&#39;</span><span class="p">,</span> <span class="s1">&#39;131&#39;</span><span class="p">,</span> <span class="s1">&#39;171&#39;</span><span class="p">,</span> <span class="s1">&#39;193&#39;</span><span class="p">,</span> <span class="s1">&#39;211&#39;</span><span class="p">,</span> <span class="s1">&#39;304&#39;</span><span class="p">,</span> <span class="s1">&#39;335&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="aia_uv_passbands">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.aia_uv_passbands">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aia_uv_passbands</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the passbands for the SDO/AIA instrument. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;1600&#39;</span><span class="p">,</span> <span class="s1">&#39;1700&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="hmi_b_segments">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.hmi_b_segments">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hmi_b_segments</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the segments for the HMI magnetogram. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">,</span> <span class="s1">&#39;inclination&#39;</span><span class="p">,</span> <span class="s1">&#39;azimuth&#39;</span><span class="p">,</span> <span class="s1">&#39;disambig&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="jsoc_notify_email">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.jsoc_notify_email">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">jsoc_notify_email</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the email address for JSOC notifications. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PYAMPP_JSOC_NOTIFY_EMAIL&quot;</span><span class="p">,</span> <span class="s2">&quot;suncasa-group@njit.edu&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hmi_b_products">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.hmi_b_products">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hmi_b_products</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the products for the HMI magnetogram. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;br&#39;</span><span class="p">,</span> <span class="s1">&#39;bp&#39;</span><span class="p">,</span> <span class="s1">&#39;bt&#39;</span><span class="p">]</span></div>
+
+
+<span class="c1"># Set up the directories when this module is imported</span>
+<span class="n">SAMPLE_DATA_DIR</span><span class="p">,</span> <span class="n">DOWNLOAD_DIR</span><span class="p">,</span> <span class="n">GXMODEL_DIR</span> <span class="o">=</span> <span class="n">setup_directories</span><span class="p">()</span>
+<div class="viewcode-block" id="AIA_EUV_PASSBANDS">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.AIA_EUV_PASSBANDS">[docs]</a>
+<span class="n">AIA_EUV_PASSBANDS</span> <span class="o">=</span> <span class="n">aia_euv_passbands</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AIA_UV_PASSBANDS">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.AIA_UV_PASSBANDS">[docs]</a>
+<span class="n">AIA_UV_PASSBANDS</span> <span class="o">=</span> <span class="n">aia_uv_passbands</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="JSOC_NOTIFY_EMAIL">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.JSOC_NOTIFY_EMAIL">[docs]</a>
+<span class="n">JSOC_NOTIFY_EMAIL</span> <span class="o">=</span> <span class="n">jsoc_notify_email</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HMI_B_SEGMENTS">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.HMI_B_SEGMENTS">[docs]</a>
+<span class="n">HMI_B_SEGMENTS</span> <span class="o">=</span> <span class="n">hmi_b_segments</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HMI_B_PRODUCTS">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/config/index.html#pyampp.util.config.HMI_B_PRODUCTS">[docs]</a>
+<span class="n">HMI_B_PRODUCTS</span> <span class="o">=</span> <span class="n">hmi_b_products</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

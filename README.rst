@@ -15,8 +15,12 @@ Format and viewer references:
 
 - Upgraded HDF5 stage format (NONE/BND/POT/NAS/NAS.GEN/NAS.CHR):
   ``docs/model_hdf5_format.rst``
+- GUI workflow and command mapping:
+  ``docs/gui_workflow.rst``
 - Viewer guide (``gxbox-view`` and ``gxrefmap-view``):
   ``docs/viewers.rst``
+- Release notes:
+  ``CHANGELOG.rst``
 
 Overview
 --------
@@ -154,6 +158,24 @@ Notes:
 - Remaining parameters are optional and have default values.
 - Set ``PYAMPP_JSOC_NOTIFY_EMAIL`` to override the JSOC export notification email (default: ``suncasa-group@njit.edu``).
 
+Entry-Box Resume / Jump Rules
+-----------------------------
+
+``gx-fov2box`` supports ``--entry-box`` with ``.h5`` or ``.sav`` input for stage-aware resume/recompute.
+
+- ``--rebuild``: ignore stage payload and recompute from ``NONE`` using resolved entry parameters.
+- ``--clone-only``: convert/copy an entry box to normalized HDF5 without recomputation (useful as ``convert-from-sav``).
+- Without ``--jump2*``, the pipeline starts from the detected entry stage.
+- When ``--entry-box`` contains ``metadata/execute``, ``--data-dir`` and ``--gxmodel-dir`` default from that execute string.
+- Explicit CLI values for ``--data-dir`` / ``--gxmodel-dir`` always override execute-derived defaults.
+- Jump validation rules are enforced:
+  - backward jumps are allowed,
+  - forward jumps are allowed by one stage,
+  - ``POT -> NAS`` is explicitly allowed (implicit ``POT -> BND -> NAS``),
+  - ``POT -> GEN`` is explicitly allowed (skip both ``BND`` and ``NAS/NLFFF``; keep true POT vectors).
+- Save requests for stages before the selected start stage are ignored with a warning.
+- In ``--clone-only`` mode, only no-jump or jump-to-self is allowed.
+
 Entrypoints
 -----------
 
@@ -164,6 +186,7 @@ After installation, the following commands become available:
 - ``gxbox``: Launch the modeling/visualization GUI.
 - ``gxbox-view``: Open an existing HDF5 model in the 3D viewer.
 - ``gxrefmap-view``: Open base/refmaps from an HDF5 model in a 2D map browser.
+- ``gx-idl2fov2box``: Translate IDL ``gx_fov2box`` execute strings (or SAV ``EXECUTE``) into Python ``gx-fov2box`` commands.
 
 License
 -------

@@ -1,0 +1,18 @@
+pyampp
+======
+
+.. py:module:: pyampp
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/pyampp/data/index
+   /autoapi/pyampp/gxbox/index
+   /autoapi/pyampp/sfq/index
+   /autoapi/pyampp/version/index
+
+

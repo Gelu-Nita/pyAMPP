@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.gxbox.gx_fov2box &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="pyampp.gxbox.gxampp" href="../gxampp/index.html" />
+    <link rel="prev" title="pyampp.gxbox.boxutils" href="../boxutils/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">pyampp</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../data/index.html">pyampp.data</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html">pyampp.gxbox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../sfq/index.html">pyampp.sfq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../version/index.html">pyampp.version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">pyampp</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">pyampp.gxbox</a></li>
+      <li class="breadcrumb-item active">pyampp.gxbox.gx_fov2box</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/pyampp/gxbox/gx_fov2box/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyampp.gxbox.gx_fov2box">
+<span id="pyampp-gxbox-gx-fov2box"></span><h1>pyampp.gxbox.gx_fov2box<a class="headerlink" href="#module-pyampp.gxbox.gx_fov2box" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gx_fov2box.app" title="pyampp.gxbox.gx_fov2box.app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">app</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig" title="pyampp.gxbox.gx_fov2box.Fov2BoxConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fov2BoxConfig</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gx_fov2box.main" title="pyampp.gxbox.gx_fov2box.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(, coords, float]] = typer.Option, hpc, hgc, hgs, ...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.app">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gx_fov2box.</span></span><span class="sig-name descname"><span class="pre">app</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.app" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gx_fov2box.</span></span><span class="sig-name descname"><span class="pre">Fov2BoxConfig</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.time">
+<span class="sig-name descname"><span class="pre">time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.coords">
+<span class="sig-name descname"><span class="pre">coords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.coords" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hpc">
+<span class="sig-name descname"><span class="pre">hpc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hpc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hgc">
+<span class="sig-name descname"><span class="pre">hgc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.hgc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hgc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hgs">
+<span class="sig-name descname"><span class="pre">hgs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.hgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.hgs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.cea">
+<span class="sig-name descname"><span class="pre">cea</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.cea"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.cea" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.top">
+<span class="sig-name descname"><span class="pre">top</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.top" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.box_dims">
+<span class="sig-name descname"><span class="pre">box_dims</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.box_dims"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.box_dims" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.dx_km">
+<span class="sig-name descname"><span class="pre">dx_km</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.dx_km"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.dx_km" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.pad_frac">
+<span class="sig-name descname"><span class="pre">pad_frac</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.pad_frac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.pad_frac" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.data_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.data_dir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.gxmodel_dir">
+<span class="sig-name descname"><span class="pre">gxmodel_dir</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.gxmodel_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.gxmodel_dir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.entry_box">
+<span class="sig-name descname"><span class="pre">entry_box</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.entry_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.entry_box" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_empty_box">
+<span class="sig-name descname"><span class="pre">save_empty_box</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_empty_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_empty_box" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_potential">
+<span class="sig-name descname"><span class="pre">save_potential</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_potential" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_bounds">
+<span class="sig-name descname"><span class="pre">save_bounds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_bounds" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_nas">
+<span class="sig-name descname"><span class="pre">save_nas</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_nas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_nas" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_gen">
+<span class="sig-name descname"><span class="pre">save_gen</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_gen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_chr">
+<span class="sig-name descname"><span class="pre">save_chr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.save_chr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.save_chr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.stop_after">
+<span class="sig-name descname"><span class="pre">stop_after</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.stop_after"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.stop_after" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.empty_box_only">
+<span class="sig-name descname"><span class="pre">empty_box_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.empty_box_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.empty_box_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.potential_only">
+<span class="sig-name descname"><span class="pre">potential_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.potential_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.potential_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.nlfff_only">
+<span class="sig-name descname"><span class="pre">nlfff_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.nlfff_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.nlfff_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.generic_only">
+<span class="sig-name descname"><span class="pre">generic_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.generic_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.generic_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.use_potential">
+<span class="sig-name descname"><span class="pre">use_potential</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.use_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.use_potential" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.skip_lines">
+<span class="sig-name descname"><span class="pre">skip_lines</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.skip_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.skip_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.center_vox">
+<span class="sig-name descname"><span class="pre">center_vox</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.center_vox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.center_vox" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.reduce_passed">
+<span class="sig-name descname"><span class="pre">reduce_passed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.reduce_passed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.reduce_passed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.euv">
+<span class="sig-name descname"><span class="pre">euv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.euv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.euv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.uv">
+<span class="sig-name descname"><span class="pre">uv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.uv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.uv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.sfq">
+<span class="sig-name descname"><span class="pre">sfq</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.sfq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.sfq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2potential">
+<span class="sig-name descname"><span class="pre">jump2potential</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.jump2potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2potential" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2bounds">
+<span class="sig-name descname"><span class="pre">jump2bounds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.jump2bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2bounds" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2nlfff">
+<span class="sig-name descname"><span class="pre">jump2nlfff</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.jump2nlfff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2nlfff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2lines">
+<span class="sig-name descname"><span class="pre">jump2lines</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.jump2lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2chromo">
+<span class="sig-name descname"><span class="pre">jump2chromo</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.jump2chromo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.jump2chromo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.rebuild">
+<span class="sig-name descname"><span class="pre">rebuild</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.rebuild"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.rebuild" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.rebuild_from_none">
+<span class="sig-name descname"><span class="pre">rebuild_from_none</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.rebuild_from_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.rebuild_from_none" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.clone_only">
+<span class="sig-name descname"><span class="pre">clone_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.clone_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.clone_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.Fov2BoxConfig.info">
+<span class="sig-name descname"><span class="pre">info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#Fov2BoxConfig.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.Fov2BoxConfig.info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.gx_fov2box.main">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gx_fov2box.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--time',</span> <span class="pre">help='Observation</span> <span class="pre">time</span> <span class="pre">ISO</span> <span class="pre">(e.g.</span> <span class="pre">2024-05-12T00:00:00)')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--coords',</span> <span class="pre">help='Center</span> <span class="pre">coords</span> <span class="pre">(x</span> <span class="pre">y)')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hpc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--hpc/--no-hpc',</span> <span class="pre">help='Use</span> <span class="pre">helioprojective</span> <span class="pre">coordinates')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hgc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--hgc/--no-hgc',</span> <span class="pre">help='Use</span> <span class="pre">heliographic</span> <span class="pre">carrington</span> <span class="pre">coordinates')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hgs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--hgs/--no-hgs',</span> <span class="pre">help='Use</span> <span class="pre">heliographic</span> <span class="pre">stonyhurst</span> <span class="pre">coordinates')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cea</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--cea',</span> <span class="pre">help='Use</span> <span class="pre">CEA</span> <span class="pre">basemap</span> <span class="pre">projection')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--top',</span> <span class="pre">help='Use</span> <span class="pre">TOP-view</span> <span class="pre">basemap</span> <span class="pre">projection')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_dims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--box-dims',</span> <span class="pre">help='Box</span> <span class="pre">dims</span> <span class="pre">in</span> <span class="pre">pixels')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_km</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(1400.0,</span> <span class="pre">'--dx-km',</span> <span class="pre">help='Voxel</span> <span class="pre">size</span> <span class="pre">in</span> <span class="pre">km')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(0.1,</span> <span class="pre">'--pad-frac',</span> <span class="pre">help='Padding</span> <span class="pre">fraction</span> <span class="pre">for</span> <span class="pre">FOV')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(DOWNLOAD_DIR,</span> <span class="pre">'--data-dir',</span> <span class="pre">help='SDO</span> <span class="pre">data</span> <span class="pre">directory')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gxmodel_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(GXMODEL_DIR,</span> <span class="pre">'--gxmodel-dir',</span> <span class="pre">help='GX</span> <span class="pre">model</span> <span class="pre">output</span> <span class="pre">directory')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_box</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--entry-box',</span> <span class="pre">help='Existing</span> <span class="pre">HDF5/SAV</span> <span class="pre">box')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_empty_box</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-empty-box',</span> <span class="pre">help='Save</span> <span class="pre">NONE</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-potential',</span> <span class="pre">help='Save</span> <span class="pre">POT</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-bounds',</span> <span class="pre">help='Save</span> <span class="pre">BND</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_nas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-nas',</span> <span class="pre">help='Save</span> <span class="pre">NAS</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_gen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-gen',</span> <span class="pre">help='Save</span> <span class="pre">NAS.GEN</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_chr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--save-chr',</span> <span class="pre">help='Save</span> <span class="pre">NAS.CHR</span> <span class="pre">stage')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--stop-after',</span> <span class="pre">help='Stop</span> <span class="pre">after</span> <span class="pre">stage</span> <span class="pre">(dl/none/pot/bnd/nas/gen/chr)')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_box_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--empty-box-only',</span> <span class="pre">help='Stop</span> <span class="pre">after</span> <span class="pre">NONE')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">potential_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--potential-only',</span> <span class="pre">help='Stop</span> <span class="pre">after</span> <span class="pre">POT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlfff_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--nlfff-only',</span> <span class="pre">help='Stop</span> <span class="pre">after</span> <span class="pre">NAS')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generic_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--generic-only',</span> <span class="pre">help='Stop</span> <span class="pre">after</span> <span class="pre">NAS.GEN')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--use-potential',</span> <span class="pre">help='Skip</span> <span class="pre">NLFFF')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--skip-lines',</span> <span class="pre">help='Skip</span> <span class="pre">GEN</span> <span class="pre">line</span> <span class="pre">computation</span> <span class="pre">and</span> <span class="pre">go</span> <span class="pre">directly</span> <span class="pre">to</span> <span class="pre">CHR')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_vox</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--center-vox',</span> <span class="pre">help='Trace</span> <span class="pre">lines</span> <span class="pre">through</span> <span class="pre">voxel</span> <span class="pre">centers')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce_passed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(None,</span> <span class="pre">'--reduce-passed',</span> <span class="pre">min=0,</span> <span class="pre">max=3,</span> <span class="pre">help='Expert</span> <span class="pre">line</span> <span class="pre">tracing</span> <span class="pre">reduction</span> <span class="pre">bitmask:</span> <span class="pre">0|1|2|3</span> <span class="pre">(overrides</span> <span class="pre">--center-vox)')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">euv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--euv',</span> <span class="pre">help='Download</span> <span class="pre">AIA</span> <span class="pre">EUV</span> <span class="pre">maps')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--uv',</span> <span class="pre">help='Download</span> <span class="pre">AIA</span> <span class="pre">UV</span> <span class="pre">maps')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--sfq',</span> <span class="pre">help='Use</span> <span class="pre">SFQ</span> <span class="pre">disambiguation</span> <span class="pre">(method=0)')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jump2potential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--jump2potential',</span> <span class="pre">help='Jump</span> <span class="pre">to</span> <span class="pre">POT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jump2bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--jump2bounds',</span> <span class="pre">help='Jump</span> <span class="pre">to</span> <span class="pre">BND')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jump2nlfff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--jump2nlfff',</span> <span class="pre">help='Jump</span> <span class="pre">to</span> <span class="pre">NAS')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jump2lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--jump2lines',</span> <span class="pre">help='Jump</span> <span class="pre">to</span> <span class="pre">GEN')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jump2chromo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--jump2chromo',</span> <span class="pre">help='Jump</span> <span class="pre">to</span> <span class="pre">CHR')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--rebuild',</span> <span class="pre">help='Recompute</span> <span class="pre">from</span> <span class="pre">NONE</span> <span class="pre">using</span> <span class="pre">entry-box</span> <span class="pre">parameters')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_from_none</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--rebuild-from-none',</span> <span class="pre">help='Start</span> <span class="pre">from</span> <span class="pre">entry-box</span> <span class="pre">NONE-equivalent</span> <span class="pre">and</span> <span class="pre">run</span> <span class="pre">forward')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clone_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--clone-only',</span> <span class="pre">help='Normalize/copy</span> <span class="pre">entry-box</span> <span class="pre">to</span> <span class="pre">H5</span> <span class="pre">without</span> <span class="pre">recomputation')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--info',</span> <span class="pre">help='Show</span> <span class="pre">resolved</span> <span class="pre">defaults</span> <span class="pre">and</span> <span class="pre">exit')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gx_fov2box.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gx_fov2box.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../boxutils/index.html" class="btn btn-neutral float-left" title="pyampp.gxbox.boxutils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gxampp/index.html" class="btn btn-neutral float-right" title="pyampp.gxbox.gxampp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

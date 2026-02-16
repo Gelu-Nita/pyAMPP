@@ -1,0 +1,158 @@
+pyampp.gxbox.boxutils
+=====================
+
+.. py:module:: pyampp.gxbox.boxutils
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.gxbox.boxutils.compute_vertical_current
+   pyampp.gxbox.boxutils.load_sunpy_map_compat
+   pyampp.gxbox.boxutils.hmi_disambig
+   pyampp.gxbox.boxutils.hmi_b2ptr
+   pyampp.gxbox.boxutils.validate_number
+   pyampp.gxbox.boxutils.set_QLineEdit_text_pos
+   pyampp.gxbox.boxutils.read_gxsim_b3d_sav
+   pyampp.gxbox.boxutils.read_b3d_h5
+   pyampp.gxbox.boxutils.write_b3d_h5
+
+
+Module Contents
+---------------
+
+.. py:function:: compute_vertical_current(b0: numpy.ndarray, b1: numpy.ndarray, b2: numpy.ndarray, wcs_header: str, rsun_arcsec: float, crpix1: float | None = None, crpix2: float | None = None, cdelt1_arcsec: float | None = None, cdelt2_arcsec: float | None = None) -> numpy.ndarray
+
+.. py:function:: load_sunpy_map_compat(path_or_data, header=None)
+
+   Load a SunPy map while tolerating IDL-style escaped FITS unit strings.
+
+   If a direct `Map(path)` fails due to unit parsing, this falls back to opening
+   the FITS file, sanitizing unit-like header fields, and building the map from
+   `(data, header)`.
+
+
+.. py:function:: hmi_disambig(azimuth_map, disambig_map, method=2)
+
+   Combine HMI disambiguation result with azimuth.
+
+   :param azimuth_map: sunpy.map.Map, The azimuth map.
+   :type azimuth_map: sunpy.map.Map
+   :param disambig_map: sunpy.map.Map, The disambiguation map.
+   :type disambig_map: sunpy.map.Map
+   :param method: int, Method index (0: potential acute, 1: random, 2: radial acute). Default is 2.
+   :type method: int, optional
+
+   :return: map_azimuth: sunpy.map.Map, The azimuth map with disambiguation applied.
+   :rtype: sunpy.map.Map
+
+
+.. py:function:: hmi_b2ptr(map_field, map_inclination, map_azimuth)
+
+   Converts the magnetic field components from SDO/HMI
+   data from field strength, inclination, and azimuth into components of the
+   magnetic field in the local heliographic coordinate system (B_phi, B_theta, B_r).
+
+   This function transforms the magnetic field vector in the local (xi, eta, zeta)
+   system to the heliographic (phi, theta, r) system. The transformation accounts for
+   the observer's position and orientation relative to the Sun.
+
+   :param map_field: `sunpy.map.Map`,
+       The magnetic field strength map from HMI, given in Gauss.
+
+   :param map_inclination: `sunpy.map.Map`,
+       The magnetic field inclination angle map from HMI, in degrees, where 0 degrees is
+       parallel to the radial direction.
+
+   :param map_azimuth: `sunpy.map.Map`,
+       The magnetic field azimuth angle map from HMI, in degrees, measured counterclockwise
+       from the north in the plane perpendicular to the radial direction.
+
+   :return: tuple,
+       A tuple containing the three magnetic field component maps in the heliographic
+       coordinate system:
+
+       - `map_bp` (`sunpy.map.Map`): The magnetic field component in the phi direction (B_phi).
+       - `map_bt` (`sunpy.map.Map`): The magnetic field component in the theta direction (B_theta).
+       - `map_br` (`sunpy.map.Map`): The magnetic field component in the radial direction (B_r).
+
+   :example:
+
+   .. code-block:: python
+
+       # Load the HMI field, inclination, and azimuth maps
+       map_field = sunpy.map.Map('hmi_field.fits')
+       map_inclination = sunpy.map.Map('hmi_inclination.fits')
+       map_azimuth = sunpy.map.Map('hmi_azimuth.fits')
+
+       # Convert to heliographic coordinates
+       map_bp, map_bt, map_br = hmi_b2ptr(map_field, map_inclination, map_azimuth)
+
+
+
+.. py:function:: validate_number(func)
+
+   Decorator to validate if the input in the widget is a number.
+
+   :param func: function,
+       The function to wrap.
+   :return: function ,
+       The wrapped function.
+
+
+.. py:function:: set_QLineEdit_text_pos(line_edit, text)
+
+   Sets the text of the QLineEdit and moves the cursor to the beginning.
+
+   :param line_edit: QLineEdit,
+       The QLineEdit widget.
+   :param text: str,
+       The text to set.
+
+
+.. py:function:: read_gxsim_b3d_sav(savfile)
+
+   Read B3D data from a ``.sav`` file and save it as a ``.gxbox`` file.
+
+   :param savfile: str,
+       The path to the ``.sav`` file.
+
+
+.. py:function:: read_b3d_h5(filename)
+
+   Read B3D data from an HDF5 file and populate a dictionary.
+
+   The resulting dictionary will contain keys corresponding to different
+   magnetic field models (e.g., 'corona' for coronal fields and 'chromo' for
+   chromospheric fields), and each model will have sub-keys for the magnetic
+   field components (e.g., 'bx', 'by', 'bz').
+
+   :param filename: str,
+       The path to the HDF5 file.
+   :return: dict,
+       A dictionary containing the B3D data.
+
+   :example:
+
+   .. code-block:: python
+
+       b3dbox = read_b3d_h5('path_to_file.h5')
+
+       # Get the coronal field components
+       bx_cor = b3dbox['corona']['bx']
+       by_cor = b3dbox['corona']['by']
+       bz_cor = b3dbox['corona']['bz']
+
+
+.. py:function:: write_b3d_h5(filename, box_b3d)
+
+   Write B3D data to an HDF5 file from a dictionary.
+
+   :param filename: str,
+       The path to the HDF5 file.
+   :param box_b3d: dict,
+       A dictionary containing the B3D data to be written.
+
+

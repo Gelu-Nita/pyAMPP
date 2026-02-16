@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.gxbox.box &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="pyampp.gxbox.boxutils" href="../boxutils/index.html" />
+    <link rel="prev" title="pyampp.gxbox.UI" href="../UI/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">pyampp</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../data/index.html">pyampp.data</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html">pyampp.gxbox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../sfq/index.html">pyampp.sfq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../version/index.html">pyampp.version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">pyampp</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">pyampp.gxbox</a></li>
+      <li class="breadcrumb-item active">pyampp.gxbox.box</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/pyampp/gxbox/box/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyampp.gxbox.box">
+<span id="pyampp-gxbox-box"></span><h1>pyampp.gxbox.box<a class="headerlink" href="#module-pyampp.gxbox.box" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.box.SphericalScreen" title="pyampp.gxbox.box.SphericalScreen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SphericalScreen</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.box.Box" title="pyampp.gxbox.box.Box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Box</span></code></a></p></td>
+<td><p>Represents a 3D box in solar or observer coordinates defined by its origin, center, dimensions, and resolution.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.SphericalScreen">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.box.</span></span><span class="sig-name descname"><span class="pre">SphericalScreen</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#SphericalScreen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.SphericalScreen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.box.</span></span><span class="sig-name descname"><span class="pre">Box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box" title="Link to this definition"></a></dt>
+<dd><p>Represents a 3D box in solar or observer coordinates defined by its origin, center, dimensions, and resolution.</p>
+<p>This class calculates and stores the coordinates of the box’s edges, differentiating between bottom edges and other
+edges. It is designed to integrate with solar physics data analysis frameworks such as SunPy and Astropy.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.corners">
+<span class="sig-name descname"><span class="pre">corners</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.corners"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.corners" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.edges">
+<span class="sig-name descname"><span class="pre">edges</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.b3dtype">
+<span class="sig-name descname"><span class="pre">b3dtype</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['pot',</span> <span class="pre">'nlfff']</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.b3dtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.b3dtype" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.b3d">
+<span class="sig-name descname"><span class="pre">b3d</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.b3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.b3d" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.corona_models">
+<span class="sig-name descname"><span class="pre">corona_models</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.corona_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.corona_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.corona_type">
+<span class="sig-name descname"><span class="pre">corona_type</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.corona_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.corona_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.dims_pix">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dims_pix</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.dims_pix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.dims_pix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.grid_coords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">grid_coords</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.grid_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.grid_coords" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bounds_coords_bl_tr">
+<span class="sig-name descname"><span class="pre">bounds_coords_bl_tr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad_frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bounds_coords_bl_tr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bounds_coords_bl_tr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bounds_coords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bounds_coords</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bounds_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bounds_coords" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bottom_bounds_coords">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bottom_bounds_coords</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bottom_bounds_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bottom_bounds_coords" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bottom_cea_header">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bottom_cea_header</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bottom_cea_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bottom_cea_header" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bottom_top_header">
+<span class="sig-name descname"><span class="pre">bottom_top_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dsun_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bottom_top_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bottom_top_header" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.bottom_edges">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bottom_edges</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.bottom_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.bottom_edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.non_bottom_edges">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">non_bottom_edges</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.non_bottom_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.non_bottom_edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyampp.gxbox.box.Box.all_edges">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">all_edges</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/box.html#Box.all_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.box.Box.all_edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../UI/index.html" class="btn btn-neutral float-left" title="pyampp.gxbox.UI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../boxutils/index.html" class="btn btn-neutral float-right" title="pyampp.gxbox.boxutils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

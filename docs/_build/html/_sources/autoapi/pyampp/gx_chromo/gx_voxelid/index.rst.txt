@@ -1,0 +1,11 @@
+pyampp.gx_chromo.gx_voxelid
+===========================
+
+.. py:module:: pyampp.gx_chromo.gx_voxelid
+
+.. autoapi-nested-parse::
+
+   Compatibility shim: gx_voxelid now lives in pyampp.gxbox.
+
+
+

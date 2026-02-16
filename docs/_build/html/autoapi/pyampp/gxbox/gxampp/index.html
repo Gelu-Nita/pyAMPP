@@ -1,0 +1,681 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.gxbox.gxampp &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="pyampp.gxbox.gxbox_factory" href="../gxbox_factory/index.html" />
+    <link rel="prev" title="pyampp.gxbox.gx_fov2box" href="../gx_fov2box/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">pyampp</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../data/index.html">pyampp.data</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html">pyampp.gxbox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../sfq/index.html">pyampp.sfq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../version/index.html">pyampp.version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">pyampp</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">pyampp.gxbox</a></li>
+      <li class="breadcrumb-item active">pyampp.gxbox.gxampp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/pyampp/gxbox/gxampp/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyampp.gxbox.gxampp">
+<span id="pyampp-gxbox-gxampp"></span><h1>pyampp.gxbox.gxampp<a class="headerlink" href="#module-pyampp.gxbox.gxampp" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gxampp.app" title="pyampp.gxbox.gxampp.app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">app</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.gxampp.base_dir" title="pyampp.gxbox.gxampp.base_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base_dir</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gxampp.CustomQLineEdit" title="pyampp.gxbox.gxampp.CustomQLineEdit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomQLineEdit</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.gxampp.PyAmppGUI" title="pyampp.gxbox.gxampp.PyAmppGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyAmppGUI</span></code></a></p></td>
+<td><p>Main application GUI for the Solar Data Model.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.gxampp.main" title="pyampp.gxbox.gxampp.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>([debug])</p></td>
+<td><p>Entry point for the PyAmppGUI application.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.app">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gxampp.</span></span><span class="sig-name descname"><span class="pre">app</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.app" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.base_dir">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gxampp.</span></span><span class="sig-name descname"><span class="pre">base_dir</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#base_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.base_dir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.CustomQLineEdit">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gxampp.</span></span><span class="sig-name descname"><span class="pre">CustomQLineEdit</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#CustomQLineEdit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.CustomQLineEdit" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QLineEdit</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.CustomQLineEdit.setTextL">
+<span class="sig-name descname"><span class="pre">setTextL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#CustomQLineEdit.setTextL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.CustomQLineEdit.setTextL" title="Link to this definition"></a></dt>
+<dd><p>Sets the text of the QLineEdit and moves the cursor to the beginning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> – str
+The text to set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gxampp.</span></span><span class="sig-name descname"><span class="pre">PyAmppGUI</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QMainWindow</span></code></p>
+<p>Main application GUI for the Solar Data Model.</p>
+<p>This class creates the main window and sets up the user interface for managing solar data and model configurations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.central_widget">
+<span class="sig-name descname"><span class="pre">central_widget</span></span><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.central_widget" title="Link to this definition"></a></dt>
+<dd><p>The central widget of the main window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>QWidget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.main_layout">
+<span class="sig-name descname"><span class="pre">main_layout</span></span><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.main_layout" title="Link to this definition"></a></dt>
+<dd><p>The main layout for the central widget.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>QVBoxLayout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">initUI():</span></span></dt>
+<dd><p>Initializes the user interface.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_data_repository_section():</span></span></dt>
+<dd><p>Adds the data repository section to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_sdo_data_dir():</span></span></dt>
+<dd><p>Updates the SDO data directory path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_gxmodel_dir():</span></span></dt>
+<dd><p>Updates the GX model directory path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_external_box_dir():</span></span></dt>
+<dd><p>Updates the external box directory path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_dir(new_path,</span> <span class="pre">default_path):</span></span></dt>
+<dd><p>Updates the specified directory path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">open_sdo_file_dialog():</span></span></dt>
+<dd><p>Opens a file dialog for selecting the SDO data directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">open_gx_file_dialog():</span></span></dt>
+<dd><p>Opens a file dialog for selecting the GX model directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">open_external_file_dialog():</span></span></dt>
+<dd><p>Opens a file dialog for selecting the external box directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_model_configuration_section():</span></span></dt>
+<dd><p>Adds the model configuration section to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_options_section():</span></span></dt>
+<dd><p>Adds the options section to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_cmd_display():</span></span></dt>
+<dd><p>Adds the command display section to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_cmd_buttons():</span></span></dt>
+<dd><p>Adds command buttons to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_status_log():</span></span></dt>
+<dd><p>Adds the status log section to the UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_command_display():</span></span></dt>
+<dd><p>Updates the command display with the current command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_hpc_state(checked):</span></span></dt>
+<dd><p>Updates the UI when Helioprojective coordinates are selected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">update_hgc_state(checked):</span></span></dt>
+<dd><p>Updates the UI when Heliographic Carrington coordinates are selected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_command():</span></span></dt>
+<dd><p>Constructs the command based on the current UI settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">execute_command():</span></span></dt>
+<dd><p>Executes the constructed command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">save_command():</span></span></dt>
+<dd><p>Saves the current command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">refresh_command():</span></span></dt>
+<dd><p>Refreshes the current session.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">clear_command():</span></span></dt>
+<dd><p>Clears the status log.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.info_only_box">
+<span class="sig-name descname"><span class="pre">info_only_box</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.info_only_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.info_only_box" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.model_time_orig">
+<span class="sig-name descname"><span class="pre">model_time_orig</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.model_time_orig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.model_time_orig" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.rotate_revert_button">
+<span class="sig-name descname"><span class="pre">rotate_revert_button</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.rotate_revert_button"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.rotate_revert_button" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.coords_center">
+<span class="sig-name descname"><span class="pre">coords_center</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.coords_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.coords_center" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.coords_center_orig">
+<span class="sig-name descname"><span class="pre">coords_center_orig</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.coords_center_orig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.coords_center_orig" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.initUI">
+<span class="sig-name descname"><span class="pre">initUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.initUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.initUI" title="Link to this definition"></a></dt>
+<dd><p>Sets up the initial user interface for the main window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_data_repository_section">
+<span class="sig-name descname"><span class="pre">add_data_repository_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_data_repository_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_data_repository_section" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_sdo_data_dir">
+<span class="sig-name descname"><span class="pre">update_sdo_data_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_sdo_data_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_sdo_data_dir" title="Link to this definition"></a></dt>
+<dd><p>Updates the SDO data directory path based on the user input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_gxmodel_dir">
+<span class="sig-name descname"><span class="pre">update_gxmodel_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_gxmodel_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_gxmodel_dir" title="Link to this definition"></a></dt>
+<dd><p>Updates the GX model directory path based on the user input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_jsoc_notify_email">
+<span class="sig-name descname"><span class="pre">update_jsoc_notify_email</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_jsoc_notify_email"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_jsoc_notify_email" title="Link to this definition"></a></dt>
+<dd><p>Updates the JSOC notify email via the PYAMPP_JSOC_NOTIFY_EMAIL environment variable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.read_external_box">
+<span class="sig-name descname"><span class="pre">read_external_box</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.read_external_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.read_external_box" title="Link to this definition"></a></dt>
+<dd><p>Reads the external box path based on the user input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_external_box_dir">
+<span class="sig-name descname"><span class="pre">update_external_box_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_external_box_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_external_box_dir" title="Link to this definition"></a></dt>
+<dd><p>Updates the external box directory path based on the user input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_dir">
+<span class="sig-name descname"><span class="pre">update_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_edit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_dir" title="Link to this definition"></a></dt>
+<dd><p>Updates the specified directory path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_path</strong> (<em>str</em>) – The new directory path.</p></li>
+<li><p><strong>default_path</strong> (<em>str</em>) – The default directory path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.open_sdo_file_dialog">
+<span class="sig-name descname"><span class="pre">open_sdo_file_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.open_sdo_file_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.open_sdo_file_dialog" title="Link to this definition"></a></dt>
+<dd><p>Opens a file dialog for selecting the SDO data directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.open_gx_file_dialog">
+<span class="sig-name descname"><span class="pre">open_gx_file_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.open_gx_file_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.open_gx_file_dialog" title="Link to this definition"></a></dt>
+<dd><p>Opens a file dialog for selecting the GX model directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.open_external_file_dialog">
+<span class="sig-name descname"><span class="pre">open_external_file_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.open_external_file_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.open_external_file_dialog" title="Link to this definition"></a></dt>
+<dd><p>Opens a file dialog for selecting the external box directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_model_configuration_section">
+<span class="sig-name descname"><span class="pre">add_model_configuration_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_model_configuration_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_model_configuration_section" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_options_section">
+<span class="sig-name descname"><span class="pre">add_options_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_options_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_options_section" title="Link to this definition"></a></dt>
+<dd><p>Adds the options section to the main layout.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_cmd_display">
+<span class="sig-name descname"><span class="pre">add_cmd_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_cmd_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_cmd_display" title="Link to this definition"></a></dt>
+<dd><p>Adds the command display section to the main layout.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_cmd_buttons">
+<span class="sig-name descname"><span class="pre">add_cmd_buttons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_cmd_buttons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_cmd_buttons" title="Link to this definition"></a></dt>
+<dd><p>Adds the command buttons to the main layout.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.add_status_log">
+<span class="sig-name descname"><span class="pre">add_status_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.add_status_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.add_status_log" title="Link to this definition"></a></dt>
+<dd><p>Adds the status log section to the main layout.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_coord_x_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_coord_x_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_coord_x_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_coord_x_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_coord_y_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_coord_y_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_coord_y_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_coord_y_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_grid_x_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_grid_x_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_grid_x_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_grid_x_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_grid_y_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_grid_y_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_grid_y_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_grid_y_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_grid_z_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_grid_z_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_grid_z_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_grid_z_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_res_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_res_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_res_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_res_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_padding_size_input_return_pressed">
+<span class="sig-name descname"><span class="pre">on_padding_size_input_return_pressed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_padding_size_input_return_pressed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_padding_size_input_return_pressed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_time_input_changed">
+<span class="sig-name descname"><span class="pre">on_time_input_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_time_input_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_time_input_changed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_rotate_revert_button_clicked">
+<span class="sig-name descname"><span class="pre">on_rotate_revert_button_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_rotate_revert_button_clicked"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_rotate_revert_button_clicked" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.rotate_revert">
+<span class="sig-name descname"><span class="pre">rotate_revert</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.rotate_revert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.rotate_revert" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.on_rotate_model_to_time">
+<span class="sig-name descname"><span class="pre">on_rotate_model_to_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.on_rotate_model_to_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.on_rotate_model_to_time" title="Link to this definition"></a></dt>
+<dd><p>Rotates the model to the specified time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_command_display">
+<span class="sig-name descname"><span class="pre">update_command_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_command_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_command_display" title="Link to this definition"></a></dt>
+<dd><p>Updates the command display with the current command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_hpc_state">
+<span class="sig-name descname"><span class="pre">update_hpc_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checked</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_hpc_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_hpc_state" title="Link to this definition"></a></dt>
+<dd><p>Updates the UI when Helioprojective coordinates are selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checked</strong> (<em>bool</em>) – Whether the Helioprojective radio button is checked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_hgc_state">
+<span class="sig-name descname"><span class="pre">update_hgc_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checked</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_hgc_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_hgc_state" title="Link to this definition"></a></dt>
+<dd><p>Updates the UI when Heliographic Carrington coordinates are selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checked</strong> (<em>bool</em>) – Whether the Heliographic Carrington radio button is checked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_hgs_state">
+<span class="sig-name descname"><span class="pre">update_hgs_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checked</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_hgs_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_hgs_state" title="Link to this definition"></a></dt>
+<dd><p>Updates the UI when Heliographic Stonyhurst coordinates are selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checked</strong> (<em>bool</em>) – Whether the Heliographic Stonyhurst radio button is checked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.update_coords_center">
+<span class="sig-name descname"><span class="pre">update_coords_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">revert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.update_coords_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.update_coords_center" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.get_command">
+<span class="sig-name descname"><span class="pre">get_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.get_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.get_command" title="Link to this definition"></a></dt>
+<dd><p>Constructs the command based on the current UI settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The command as a list of strings.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.execute_command">
+<span class="sig-name descname"><span class="pre">execute_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.execute_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.execute_command" title="Link to this definition"></a></dt>
+<dd><p>Executes the constructed command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.stop_command">
+<span class="sig-name descname"><span class="pre">stop_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.stop_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.stop_command" title="Link to this definition"></a></dt>
+<dd><p>Stops the running GXbox process if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.save_command">
+<span class="sig-name descname"><span class="pre">save_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.save_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.save_command" title="Link to this definition"></a></dt>
+<dd><p>Saves the current command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.refresh_command">
+<span class="sig-name descname"><span class="pre">refresh_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.refresh_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.refresh_command" title="Link to this definition"></a></dt>
+<dd><p>Refreshes the current session.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.clear_command">
+<span class="sig-name descname"><span class="pre">clear_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.clear_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.clear_command" title="Link to this definition"></a></dt>
+<dd><p>Clears the status log.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.clear_console">
+<span class="sig-name descname"><span class="pre">clear_console</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.clear_console"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.clear_console" title="Link to this definition"></a></dt>
+<dd><p>Clears the console panel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.copy_console">
+<span class="sig-name descname"><span class="pre">copy_console</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.copy_console"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.copy_console" title="Link to this definition"></a></dt>
+<dd><p>Copies the full console text to clipboard.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.save_console">
+<span class="sig-name descname"><span class="pre">save_console</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.save_console"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.save_console" title="Link to this definition"></a></dt>
+<dd><p>Saves the console output to a text file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.PyAmppGUI.send_to_gxbox_view">
+<span class="sig-name descname"><span class="pre">send_to_gxbox_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#PyAmppGUI.send_to_gxbox_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.PyAmppGUI.send_to_gxbox_view" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.gxampp.main">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.gxampp.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">typer.Option(False,</span> <span class="pre">'--debug',</span> <span class="pre">help='Enable</span> <span class="pre">debug</span> <span class="pre">mode</span> <span class="pre">with</span> <span class="pre">an</span> <span class="pre">interactive</span> <span class="pre">IPython</span> <span class="pre">session.')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/gxampp.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.gxampp.main" title="Link to this definition"></a></dt>
+<dd><p>Entry point for the PyAmppGUI application.</p>
+<p>This function initializes the PyQt application, sets up and displays the main
+GUI window for the Solar Data Model. It pre-configures some GUI elements with default
+values for model time and coordinates. Default values are set programmatically
+before the event loop starts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable debug mode with an interactive IPython session, defaults to False</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>SystemExit</strong> – Exits the application loop when the GUI is closed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>NoneType</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gxampp
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gx_fov2box/index.html" class="btn btn-neutral float-left" title="pyampp.gxbox.gx_fov2box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gxbox_factory/index.html" class="btn btn-neutral float-right" title="pyampp.gxbox.gxbox_factory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

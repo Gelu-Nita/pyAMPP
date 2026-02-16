@@ -1,0 +1,199 @@
+pyampp.gxbox.gx_fov2box
+=======================
+
+.. py:module:: pyampp.gxbox.gx_fov2box
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   pyampp.gxbox.gx_fov2box.app
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   pyampp.gxbox.gx_fov2box.Fov2BoxConfig
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.gxbox.gx_fov2box.main
+
+
+Module Contents
+---------------
+
+.. py:data:: app
+
+.. py:class:: Fov2BoxConfig
+
+   .. py:attribute:: time
+      :type:  Optional[str]
+
+
+   .. py:attribute:: coords
+      :type:  Optional[Tuple[float, float]]
+
+
+   .. py:attribute:: hpc
+      :type:  bool
+
+
+   .. py:attribute:: hgc
+      :type:  bool
+
+
+   .. py:attribute:: hgs
+      :type:  bool
+
+
+   .. py:attribute:: cea
+      :type:  bool
+
+
+   .. py:attribute:: top
+      :type:  bool
+
+
+   .. py:attribute:: box_dims
+      :type:  Optional[Tuple[int, int, int]]
+
+
+   .. py:attribute:: dx_km
+      :type:  float
+
+
+   .. py:attribute:: pad_frac
+      :type:  float
+
+
+   .. py:attribute:: data_dir
+      :type:  str
+
+
+   .. py:attribute:: gxmodel_dir
+      :type:  str
+
+
+   .. py:attribute:: entry_box
+      :type:  Optional[str]
+
+
+   .. py:attribute:: save_empty_box
+      :type:  bool
+
+
+   .. py:attribute:: save_potential
+      :type:  bool
+
+
+   .. py:attribute:: save_bounds
+      :type:  bool
+
+
+   .. py:attribute:: save_nas
+      :type:  bool
+
+
+   .. py:attribute:: save_gen
+      :type:  bool
+
+
+   .. py:attribute:: save_chr
+      :type:  bool
+
+
+   .. py:attribute:: stop_after
+      :type:  Optional[str]
+
+
+   .. py:attribute:: empty_box_only
+      :type:  bool
+
+
+   .. py:attribute:: potential_only
+      :type:  bool
+
+
+   .. py:attribute:: nlfff_only
+      :type:  bool
+
+
+   .. py:attribute:: generic_only
+      :type:  bool
+
+
+   .. py:attribute:: use_potential
+      :type:  bool
+
+
+   .. py:attribute:: skip_lines
+      :type:  bool
+
+
+   .. py:attribute:: center_vox
+      :type:  bool
+
+
+   .. py:attribute:: reduce_passed
+      :type:  Optional[int]
+
+
+   .. py:attribute:: euv
+      :type:  bool
+
+
+   .. py:attribute:: uv
+      :type:  bool
+
+
+   .. py:attribute:: sfq
+      :type:  bool
+
+
+   .. py:attribute:: jump2potential
+      :type:  bool
+
+
+   .. py:attribute:: jump2bounds
+      :type:  bool
+
+
+   .. py:attribute:: jump2nlfff
+      :type:  bool
+
+
+   .. py:attribute:: jump2lines
+      :type:  bool
+
+
+   .. py:attribute:: jump2chromo
+      :type:  bool
+
+
+   .. py:attribute:: rebuild
+      :type:  bool
+
+
+   .. py:attribute:: rebuild_from_none
+      :type:  bool
+
+
+   .. py:attribute:: clone_only
+      :type:  bool
+
+
+   .. py:attribute:: info
+      :type:  bool
+
+
+.. py:function:: main(time: Optional[str] = typer.Option(None, '--time', help='Observation time ISO (e.g. 2024-05-12T00:00:00)'), coords: Optional[Tuple[float, float]] = typer.Option(None, '--coords', help='Center coords (x y)'), hpc: bool = typer.Option(False, '--hpc/--no-hpc', help='Use helioprojective coordinates'), hgc: bool = typer.Option(False, '--hgc/--no-hgc', help='Use heliographic carrington coordinates'), hgs: bool = typer.Option(False, '--hgs/--no-hgs', help='Use heliographic stonyhurst coordinates'), cea: bool = typer.Option(False, '--cea', help='Use CEA basemap projection'), top: bool = typer.Option(False, '--top', help='Use TOP-view basemap projection'), box_dims: Optional[Tuple[int, int, int]] = typer.Option(None, '--box-dims', help='Box dims in pixels'), dx_km: float = typer.Option(1400.0, '--dx-km', help='Voxel size in km'), pad_frac: float = typer.Option(0.1, '--pad-frac', help='Padding fraction for FOV'), data_dir: str = typer.Option(DOWNLOAD_DIR, '--data-dir', help='SDO data directory'), gxmodel_dir: str = typer.Option(GXMODEL_DIR, '--gxmodel-dir', help='GX model output directory'), entry_box: Optional[str] = typer.Option(None, '--entry-box', help='Existing HDF5/SAV box'), save_empty_box: bool = typer.Option(False, '--save-empty-box', help='Save NONE stage'), save_potential: bool = typer.Option(False, '--save-potential', help='Save POT stage'), save_bounds: bool = typer.Option(False, '--save-bounds', help='Save BND stage'), save_nas: bool = typer.Option(False, '--save-nas', help='Save NAS stage'), save_gen: bool = typer.Option(False, '--save-gen', help='Save NAS.GEN stage'), save_chr: bool = typer.Option(False, '--save-chr', help='Save NAS.CHR stage'), stop_after: Optional[str] = typer.Option(None, '--stop-after', help='Stop after stage (dl/none/pot/bnd/nas/gen/chr)'), empty_box_only: bool = typer.Option(False, '--empty-box-only', help='Stop after NONE'), potential_only: bool = typer.Option(False, '--potential-only', help='Stop after POT'), nlfff_only: bool = typer.Option(False, '--nlfff-only', help='Stop after NAS'), generic_only: bool = typer.Option(False, '--generic-only', help='Stop after NAS.GEN'), use_potential: bool = typer.Option(False, '--use-potential', help='Skip NLFFF'), skip_lines: bool = typer.Option(False, '--skip-lines', help='Skip GEN line computation and go directly to CHR'), center_vox: bool = typer.Option(False, '--center-vox', help='Trace lines through voxel centers'), reduce_passed: Optional[int] = typer.Option(None, '--reduce-passed', min=0, max=3, help='Expert line tracing reduction bitmask: 0|1|2|3 (overrides --center-vox)'), euv: bool = typer.Option(False, '--euv', help='Download AIA EUV maps'), uv: bool = typer.Option(False, '--uv', help='Download AIA UV maps'), sfq: bool = typer.Option(False, '--sfq', help='Use SFQ disambiguation (method=0)'), jump2potential: bool = typer.Option(False, '--jump2potential', help='Jump to POT'), jump2bounds: bool = typer.Option(False, '--jump2bounds', help='Jump to BND'), jump2nlfff: bool = typer.Option(False, '--jump2nlfff', help='Jump to NAS'), jump2lines: bool = typer.Option(False, '--jump2lines', help='Jump to GEN'), jump2chromo: bool = typer.Option(False, '--jump2chromo', help='Jump to CHR'), rebuild: bool = typer.Option(False, '--rebuild', help='Recompute from NONE using entry-box parameters'), rebuild_from_none: bool = typer.Option(False, '--rebuild-from-none', help='Start from entry-box NONE-equivalent and run forward'), clone_only: bool = typer.Option(False, '--clone-only', help='Normalize/copy entry-box to H5 without recomputation'), info: bool = typer.Option(False, '--info', help='Show resolved defaults and exit')) -> None
+

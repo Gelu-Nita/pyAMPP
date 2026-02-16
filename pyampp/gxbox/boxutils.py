@@ -1,6 +1,7 @@
 import numpy as np
 import astropy.units as u
 from astropy.io import fits
+from sunpy.map import Map
 
 def _bilinear_sample(arr: np.ndarray, x: np.ndarray, y: np.ndarray) -> np.ndarray:
     x0 = np.floor(x).astype(int)
@@ -100,10 +101,62 @@ def compute_vertical_current(b0: np.ndarray,
             jr[i1, i2] /= 2 * (delta * 696e6) * (4 * np.pi * 1e-7)
 
     return jr
-import astropy.units as u
+
+
+def _sanitize_unit_like_header_values(header: fits.Header) -> fits.Header:
+    """
+    Normalize non-standard escaped unit strings found in some IDL-written FITS.
+    Example: 'DN\\/s' -> 'DN/s'.
+    """
+    for key in ("BUNIT", "CUNIT1", "CUNIT2"):
+        if key in header:
+            value = header.get(key)
+            if isinstance(value, str):
+                fixed = value.replace("\\/", "/").replace("\\", "")
+                if fixed != value:
+                    header[key] = fixed
+    return header
+
+
+def _first_image_hdu(hdulist):
+    for hdu in hdulist:
+        if getattr(hdu, "data", None) is not None:
+            return hdu
+    raise ValueError("No image HDU with data found in FITS file.")
+
+
+def load_sunpy_map_compat(path_or_data, header=None):
+    """
+    Load a SunPy map while tolerating IDL-style escaped FITS unit strings.
+
+    If a direct `Map(path)` fails due to unit parsing, this falls back to opening
+    the FITS file, sanitizing unit-like header fields, and building the map from
+    `(data, header)`.
+    """
+    if header is not None:
+        if isinstance(header, fits.Header):
+            safe_header = _sanitize_unit_like_header_values(header.copy())
+        else:
+            safe_header = _sanitize_unit_like_header_values(fits.Header(header))
+        return Map(path_or_data, safe_header)
+
+    try:
+        return Map(path_or_data)
+    except Exception as exc:
+        msg = str(exc)
+        if ("did not parse as unit" not in msg) and ("not a valid unit" not in msg):
+            raise
+
+        with fits.open(path_or_data) as hdul:
+            image_hdu = _first_image_hdu(hdul)
+            data = image_hdu.data
+            safe_header = _sanitize_unit_like_header_values(image_hdu.header.copy())
+        return Map(data, safe_header)
+
+
 from astropy.coordinates import SkyCoord
 from sunpy.coordinates import HeliographicCarrington, HeliographicStonyhurst
-from sunpy.map import all_coordinates_from_map, Map
+from sunpy.map import all_coordinates_from_map
 from PyQt5.QtWidgets import  QMessageBox
 
 import numpy as np
@@ -281,13 +334,12 @@ def set_QLineEdit_text_pos(line_edit, text):
 
 
 def read_gxsim_b3d_sav(savfile):
-    '''
-    Read the B3D data from the .sav file and save it as a .gxbox file
+    """
+    Read B3D data from a ``.sav`` file and save it as a ``.gxbox`` file.
+
     :param savfile: str,
-        The path to the .sav file.
-
-
-    '''
+        The path to the ``.sav`` file.
+    """
     from scipy.io import readsav
     import pickle
     bdata = readsav(savfile)
@@ -341,9 +393,14 @@ def read_b3d_h5(filename):
             group = hdf_file[model_type]
             target_type = model_type
             model_attr = None
-            if model_type in ("nlfff", "pot", "potential"):
+            if model_type in ("nlfff", "pot", "potential", "bounds"):
                 target_type = "corona"
-                model_attr = "pot" if model_type == "potential" else model_type
+                if model_type == "potential":
+                    model_attr = "pot"
+                elif model_type in ("bounds",):
+                    model_attr = "bnd"
+                else:
+                    model_attr = model_type
             if target_type not in box_b3d:
                 box_b3d[target_type] = {}
             for component in group.keys():
@@ -397,11 +454,16 @@ def write_b3d_h5(filename, box_b3d):
                 continue
             target_type = model_type
             attrs = components.get("attrs", {}) if isinstance(components, dict) else {}
-            if model_type in ("nlfff", "pot", "potential"):
+            if model_type in ("nlfff", "pot", "potential", "bounds"):
                 target_type = "corona"
                 if "model_type" not in attrs:
                     attrs = dict(attrs)
-                    attrs["model_type"] = "pot" if model_type == "potential" else model_type
+                    if model_type == "potential":
+                        attrs["model_type"] = "pot"
+                    elif model_type == "bounds":
+                        attrs["model_type"] = "bnd"
+                    else:
+                        attrs["model_type"] = model_type
             if target_type in hdf_file:
                 # Avoid collisions if multiple legacy groups map to corona
                 continue
@@ -412,12 +474,12 @@ def write_b3d_h5(filename, box_b3d):
                 if isinstance(data, dict):
                     sub = group.create_group(component)
                     for sub_key, sub_val in data.items():
-                        if target_type == "chromo" and sub_key == "voxel_status":
+                        if target_type in ("chromo", "lines") and sub_key == "voxel_status":
                             sub.create_dataset(sub_key, data=np.asarray(sub_val, dtype=np.uint8))
                         else:
                             sub.create_dataset(sub_key, data=sub_val)
                 else:
-                    if target_type == "chromo" and component == "voxel_status":
+                    if target_type in ("chromo", "lines") and component == "voxel_status":
                         group.create_dataset(component, data=np.asarray(data, dtype=np.uint8))
                     else:
                         group.create_dataset(component, data=data)

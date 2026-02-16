@@ -1,0 +1,29 @@
+pyampp.sfq
+==========
+
+.. py:module:: pyampp.sfq
+
+.. autoapi-nested-parse::
+
+   SFQ (Super Fast and Quality) disambiguation package for pyAMPP.
+
+   Source attribution:
+   - George Rudenko
+   - Sergey Anfinogentov
+   - Original IDL package: https://github.com/Sergey-Anfinogentov
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/pyampp/sfq/clean/index
+   /autoapi/pyampp/sfq/frame/index
+   /autoapi/pyampp/sfq/potential/index
+   /autoapi/pyampp/sfq/step/index
+   /autoapi/pyampp/sfq/utils/index
+
+

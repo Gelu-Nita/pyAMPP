@@ -1,0 +1,32 @@
+pyampp.util.h5tree
+==================
+
+.. py:module:: pyampp.util.h5tree
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   pyampp.util.h5tree.app
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.util.h5tree.main
+
+
+Module Contents
+---------------
+
+.. py:data:: app
+
+.. py:function:: main(ctx: typer.Context, path: Optional[pathlib.Path] = typer.Argument(None, exists=True, file_okay=True, dir_okay=False, readable=True), show_attrs: bool = typer.Option(False, '--attrs', help='Show dataset/group attributes.'), max_attr_len: int | None = typer.Option(120, '--attr-max', help='Max length for each attribute entry.'), max_depth: int | None = typer.Option(None, '--max-depth', help='Limit recursion depth.'), flt: Optional[str] = typer.Option(None, '--filter', help='Only show paths matching this string.'), show_metadata: bool = typer.Option(False, '--show-metadata', help='Print metadata/id and metadata/execute if present.')) -> None
+
+   Print a tree of groups/datasets with shapes and dtypes.
+
+

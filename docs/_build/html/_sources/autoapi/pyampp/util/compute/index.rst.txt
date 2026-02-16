@@ -1,0 +1,47 @@
+pyampp.util.compute
+===================
+
+.. py:module:: pyampp.util.compute
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.util.compute.cutout2box
+   pyampp.util.compute.hmi_b2ptr
+   pyampp.util.compute.ampp_field
+
+
+Module Contents
+---------------
+
+.. py:function:: cutout2box(_map, center_x, center_y, dx_km, shape)
+
+.. py:function:: hmi_b2ptr(map_field, map_inclination, map_azimuth)
+
+.. py:function:: ampp_field(dl_path, out_model, x, y, dx, dy, dz, res)
+
+   Creates a model of coronal magnetic fields, including potential, nlfff and thermal corona model
+
+   :param dl_path: Path to the folder where downloaded files (HMI magnetograms) are stored
+   :type dl_path: str
+   :param out_model: Path to output HDF5 model file (.h5)
+   :type out_model: str
+   :param x: X coordinate of active region center (arcsec)
+   :type x: float
+   :param y: Y coordinate of active region center (arcsec)
+   :type y: float
+   :param dx: number of voxels in X direction
+   :type dx: int
+   :param dy: number of voxels in Y direction
+   :type dy: int
+   :param dz: number of voxels in Z (vertical, to corona) direction
+   :type dz: int
+   :param res:
+   :type res: dimensional astropy Quantity
+
+   :returns: None
+
+

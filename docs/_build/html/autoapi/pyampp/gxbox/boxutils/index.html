@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.gxbox.boxutils &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="pyampp.gxbox.gx_fov2box" href="../gx_fov2box/index.html" />
+    <link rel="prev" title="pyampp.gxbox.box" href="../box/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">pyampp</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../data/index.html">pyampp.data</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html">pyampp.gxbox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../sfq/index.html">pyampp.sfq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../version/index.html">pyampp.version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">pyampp</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">pyampp.gxbox</a></li>
+      <li class="breadcrumb-item active">pyampp.gxbox.boxutils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/pyampp/gxbox/boxutils/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyampp.gxbox.boxutils">
+<span id="pyampp-gxbox-boxutils"></span><h1>pyampp.gxbox.boxutils<a class="headerlink" href="#module-pyampp.gxbox.boxutils" title="Link to this heading"></a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.compute_vertical_current" title="pyampp.gxbox.boxutils.compute_vertical_current"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_vertical_current</span></code></a>(→ numpy.ndarray)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.load_sunpy_map_compat" title="pyampp.gxbox.boxutils.load_sunpy_map_compat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_sunpy_map_compat</span></code></a>(path_or_data[, header])</p></td>
+<td><p>Load a SunPy map while tolerating IDL-style escaped FITS unit strings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.hmi_disambig" title="pyampp.gxbox.boxutils.hmi_disambig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmi_disambig</span></code></a>(azimuth_map, disambig_map[, method])</p></td>
+<td><p>Combine HMI disambiguation result with azimuth.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.hmi_b2ptr" title="pyampp.gxbox.boxutils.hmi_b2ptr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmi_b2ptr</span></code></a>(map_field, map_inclination, map_azimuth)</p></td>
+<td><p>Converts the magnetic field components from SDO/HMI</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.validate_number" title="pyampp.gxbox.boxutils.validate_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_number</span></code></a>(func)</p></td>
+<td><p>Decorator to validate if the input in the widget is a number.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.set_QLineEdit_text_pos" title="pyampp.gxbox.boxutils.set_QLineEdit_text_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_QLineEdit_text_pos</span></code></a>(line_edit, text)</p></td>
+<td><p>Sets the text of the QLineEdit and moves the cursor to the beginning.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.read_gxsim_b3d_sav" title="pyampp.gxbox.boxutils.read_gxsim_b3d_sav"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_gxsim_b3d_sav</span></code></a>(savfile)</p></td>
+<td><p>Read B3D data from a <code class="docutils literal notranslate"><span class="pre">.sav</span></code> file and save it as a <code class="docutils literal notranslate"><span class="pre">.gxbox</span></code> file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.read_b3d_h5" title="pyampp.gxbox.boxutils.read_b3d_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_b3d_h5</span></code></a>(filename)</p></td>
+<td><p>Read B3D data from an HDF5 file and populate a dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyampp.gxbox.boxutils.write_b3d_h5" title="pyampp.gxbox.boxutils.write_b3d_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_b3d_h5</span></code></a>(filename, box_b3d)</p></td>
+<td><p>Write B3D data to an HDF5 file from a dictionary.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.compute_vertical_current">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">compute_vertical_current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wcs_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsun_arcsec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crpix1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crpix2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdelt1_arcsec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdelt2_arcsec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#compute_vertical_current"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.compute_vertical_current" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.load_sunpy_map_compat">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">load_sunpy_map_compat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#load_sunpy_map_compat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.load_sunpy_map_compat" title="Link to this definition"></a></dt>
+<dd><p>Load a SunPy map while tolerating IDL-style escaped FITS unit strings.</p>
+<p>If a direct <cite>Map(path)</cite> fails due to unit parsing, this falls back to opening
+the FITS file, sanitizing unit-like header fields, and building the map from
+<cite>(data, header)</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.hmi_disambig">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">hmi_disambig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">azimuth_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disambig_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#hmi_disambig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.hmi_disambig" title="Link to this definition"></a></dt>
+<dd><p>Combine HMI disambiguation result with azimuth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>azimuth_map</strong> (<em>sunpy.map.Map</em>) – sunpy.map.Map, The azimuth map.</p></li>
+<li><p><strong>disambig_map</strong> (<em>sunpy.map.Map</em>) – sunpy.map.Map, The disambiguation map.</p></li>
+<li><p><strong>method</strong> (<em>int</em><em>, </em><em>optional</em>) – int, Method index (0: potential acute, 1: random, 2: radial acute). Default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>map_azimuth: sunpy.map.Map, The azimuth map with disambiguation applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sunpy.map.Map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.hmi_b2ptr">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">hmi_b2ptr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_inclination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_azimuth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#hmi_b2ptr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.hmi_b2ptr" title="Link to this definition"></a></dt>
+<dd><p>Converts the magnetic field components from SDO/HMI
+data from field strength, inclination, and azimuth into components of the
+magnetic field in the local heliographic coordinate system (B_phi, B_theta, B_r).</p>
+<p>This function transforms the magnetic field vector in the local (xi, eta, zeta)
+system to the heliographic (phi, theta, r) system. The transformation accounts for
+the observer’s position and orientation relative to the Sun.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map_field</strong> – <cite>sunpy.map.Map</cite>,
+The magnetic field strength map from HMI, given in Gauss.</p></li>
+<li><p><strong>map_inclination</strong> – <cite>sunpy.map.Map</cite>,
+The magnetic field inclination angle map from HMI, in degrees, where 0 degrees is
+parallel to the radial direction.</p></li>
+<li><p><strong>map_azimuth</strong> – <cite>sunpy.map.Map</cite>,
+The magnetic field azimuth angle map from HMI, in degrees, measured counterclockwise
+from the north in the plane perpendicular to the radial direction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>tuple,
+A tuple containing the three magnetic field component maps in the heliographic
+coordinate system:</p>
+<ul class="simple">
+<li><p><cite>map_bp</cite> (<cite>sunpy.map.Map</cite>): The magnetic field component in the phi direction (B_phi).</p></li>
+<li><p><cite>map_bt</cite> (<cite>sunpy.map.Map</cite>): The magnetic field component in the theta direction (B_theta).</p></li>
+<li><p><cite>map_br</cite> (<cite>sunpy.map.Map</cite>): The magnetic field component in the radial direction (B_r).</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Example<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the HMI field, inclination, and azimuth maps</span>
+<span class="n">map_field</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="s1">&#39;hmi_field.fits&#39;</span><span class="p">)</span>
+<span class="n">map_inclination</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="s1">&#39;hmi_inclination.fits&#39;</span><span class="p">)</span>
+<span class="n">map_azimuth</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="s1">&#39;hmi_azimuth.fits&#39;</span><span class="p">)</span>
+
+<span class="c1"># Convert to heliographic coordinates</span>
+<span class="n">map_bp</span><span class="p">,</span> <span class="n">map_bt</span><span class="p">,</span> <span class="n">map_br</span> <span class="o">=</span> <span class="n">hmi_b2ptr</span><span class="p">(</span><span class="n">map_field</span><span class="p">,</span> <span class="n">map_inclination</span><span class="p">,</span> <span class="n">map_azimuth</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.validate_number">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">validate_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#validate_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.validate_number" title="Link to this definition"></a></dt>
+<dd><p>Decorator to validate if the input in the widget is a number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – function,
+The function to wrap.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>function ,
+The wrapped function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.set_QLineEdit_text_pos">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">set_QLineEdit_text_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_edit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#set_QLineEdit_text_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.set_QLineEdit_text_pos" title="Link to this definition"></a></dt>
+<dd><p>Sets the text of the QLineEdit and moves the cursor to the beginning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line_edit</strong> – QLineEdit,
+The QLineEdit widget.</p></li>
+<li><p><strong>text</strong> – str,
+The text to set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.read_gxsim_b3d_sav">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">read_gxsim_b3d_sav</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">savfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#read_gxsim_b3d_sav"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.read_gxsim_b3d_sav" title="Link to this definition"></a></dt>
+<dd><p>Read B3D data from a <code class="docutils literal notranslate"><span class="pre">.sav</span></code> file and save it as a <code class="docutils literal notranslate"><span class="pre">.gxbox</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>savfile</strong> – str,
+The path to the <code class="docutils literal notranslate"><span class="pre">.sav</span></code> file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.read_b3d_h5">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">read_b3d_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#read_b3d_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.read_b3d_h5" title="Link to this definition"></a></dt>
+<dd><p>Read B3D data from an HDF5 file and populate a dictionary.</p>
+<p>The resulting dictionary will contain keys corresponding to different
+magnetic field models (e.g., ‘corona’ for coronal fields and ‘chromo’ for
+chromospheric fields), and each model will have sub-keys for the magnetic
+field components (e.g., ‘bx’, ‘by’, ‘bz’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> – str,
+The path to the HDF5 file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict,
+A dictionary containing the B3D data.</p>
+</dd>
+<dt class="field-odd">Example<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">b3dbox</span> <span class="o">=</span> <span class="n">read_b3d_h5</span><span class="p">(</span><span class="s1">&#39;path_to_file.h5&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get the coronal field components</span>
+<span class="n">bx_cor</span> <span class="o">=</span> <span class="n">b3dbox</span><span class="p">[</span><span class="s1">&#39;corona&#39;</span><span class="p">][</span><span class="s1">&#39;bx&#39;</span><span class="p">]</span>
+<span class="n">by_cor</span> <span class="o">=</span> <span class="n">b3dbox</span><span class="p">[</span><span class="s1">&#39;corona&#39;</span><span class="p">][</span><span class="s1">&#39;by&#39;</span><span class="p">]</span>
+<span class="n">bz_cor</span> <span class="o">=</span> <span class="n">b3dbox</span><span class="p">[</span><span class="s1">&#39;corona&#39;</span><span class="p">][</span><span class="s1">&#39;bz&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyampp.gxbox.boxutils.write_b3d_h5">
+<span class="sig-prename descclassname"><span class="pre">pyampp.gxbox.boxutils.</span></span><span class="sig-name descname"><span class="pre">write_b3d_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_b3d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pyampp/gxbox/boxutils.html#write_b3d_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyampp.gxbox.boxutils.write_b3d_h5" title="Link to this definition"></a></dt>
+<dd><p>Write B3D data to an HDF5 file from a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – str,
+The path to the HDF5 file.</p></li>
+<li><p><strong>box_b3d</strong> – dict,
+A dictionary containing the B3D data to be written.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../box/index.html" class="btn btn-neutral float-left" title="pyampp.gxbox.box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gx_fov2box/index.html" class="btn btn-neutral float-right" title="pyampp.gxbox.gx_fov2box" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

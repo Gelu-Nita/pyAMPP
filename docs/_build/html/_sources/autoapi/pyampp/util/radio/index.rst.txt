@@ -1,0 +1,37 @@
+pyampp.util.radio
+=================
+
+.. py:module:: pyampp.util.radio
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   pyampp.util.radio.GXRadioImageComputing
+
+
+Module Contents
+---------------
+
+.. py:class:: GXRadioImageComputing(libname)
+
+   .. py:attribute:: libname
+
+
+   .. py:attribute:: mwfunc
+
+
+   .. py:method:: load_ebtel(ebtel_file)
+
+
+   .. py:method:: load_model_dict(model_dict, header)
+
+
+   .. py:method:: load_model_sav(file_name)
+
+
+   .. py:method:: synth_model(model, model_dt, ebtel, ebtel_dt, freqlist, box_Nx, box_Ny, box_xc, box_yc, box_dx, box_dy, Tbase, nbase, Q0, a, b, force_isothermal=1)
+
+

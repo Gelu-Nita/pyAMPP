@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyampp.util.compute &mdash; pyAMPP 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyAMPP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_hdf5_format.html">pyAMPP HDF5 Model Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gui_workflow.html">pyAMPP GUI Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../viewers.html">Model Viewers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html#id1">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyAMPP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyampp.util.compute</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyampp.util.compute</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># coding: utf-8</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.io.fits</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fits</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sunpy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">frames</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sunpy.map</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">locale</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sunpy.map</span><span class="w"> </span><span class="kn">import</span> <span class="n">all_coordinates_from_map</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+
+<span class="c1"># from .gx_chromo.combo_model import combo_model</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;16&#39;</span>  <span class="c1"># number of parallel threads</span>
+<span class="n">locale</span><span class="o">.</span><span class="n">setlocale</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">LC_ALL</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">);</span>
+
+
+<div class="viewcode-block" id="cutout2box">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/compute/index.html#pyampp.util.compute.cutout2box">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cutout2box</span><span class="p">(</span><span class="n">_map</span><span class="p">,</span> <span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">,</span> <span class="n">dx_km</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="n">hmi_wcs</span> <span class="o">=</span> <span class="n">_map</span><span class="o">.</span><span class="n">wcs</span>
+    <span class="n">center_crd</span> <span class="o">=</span> <span class="n">crd</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">arcsec</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">_map</span><span class="o">.</span><span class="n">coordinate_frame</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="s2">&quot;heliographic_carrington&quot;</span><span class="p">)</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">center_crd</span><span class="o">.</span><span class="n">lon</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">center_crd</span><span class="o">.</span><span class="n">lat</span>
+    <span class="n">rad</span> <span class="o">=</span> <span class="n">center_crd</span><span class="o">.</span><span class="n">radius</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">rad</span><span class="p">,</span>
+                      <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;heliographic_carrington&quot;</span><span class="p">,</span>
+                      <span class="n">observer</span><span class="o">=</span><span class="s2">&quot;self&quot;</span><span class="p">,</span>
+                      <span class="n">obstime</span><span class="o">=</span><span class="n">_map</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">dx_km</span> <span class="o">/</span> <span class="n">origin</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">pix</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">((</span><span class="n">scale</span><span class="p">,</span> <span class="n">scale</span><span class="p">))</span>
+    <span class="n">box_header</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">make_fitswcs_header</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span>
+                                               <span class="n">projection_code</span><span class="o">=</span><span class="s1">&#39;CEA&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+
+    <span class="n">outmap</span> <span class="o">=</span> <span class="n">_map</span><span class="o">.</span><span class="n">reproject_to</span><span class="p">(</span><span class="n">box_header</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outmap</span></div>
+
+
+
+<div class="viewcode-block" id="hmi_b2ptr">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/compute/index.html#pyampp.util.compute.hmi_b2ptr">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hmi_b2ptr</span><span class="p">(</span><span class="n">map_field</span><span class="p">,</span> <span class="n">map_inclination</span><span class="p">,</span> <span class="n">map_azimuth</span><span class="p">):</span>
+    <span class="n">sz</span> <span class="o">=</span> <span class="n">map_field</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">sz</span>
+
+    <span class="n">field</span> <span class="o">=</span> <span class="n">map_field</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">map_inclination</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">map_azimuth</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">b_xi</span> <span class="o">=</span> <span class="o">-</span><span class="n">field</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">b_eta</span> <span class="o">=</span> <span class="n">field</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">b_zeta</span> <span class="o">=</span> <span class="n">field</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
+
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">all_coordinates_from_map</span><span class="p">(</span><span class="n">map_field</span><span class="p">)</span><span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="s2">&quot;heliographic_stonyhurst&quot;</span><span class="p">)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">foo</span><span class="o">.</span><span class="n">lon</span>
+    <span class="n">lambda_</span> <span class="o">=</span> <span class="n">foo</span><span class="o">.</span><span class="n">lat</span>
+
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">map_field</span><span class="o">.</span><span class="n">fits_header</span><span class="p">[</span><span class="s2">&quot;crlt_obs&quot;</span><span class="p">])</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="n">map_field</span><span class="o">.</span><span class="n">fits_header</span><span class="p">[</span><span class="s2">&quot;crota2&quot;</span><span class="p">])</span>
+
+    <span class="n">phi</span><span class="p">,</span> <span class="n">lambda_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lambda_</span><span class="p">)</span>
+
+    <span class="n">sinb</span><span class="p">,</span> <span class="n">cosb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">sinp</span><span class="p">,</span> <span class="n">cosp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">sinphi</span><span class="p">,</span> <span class="n">cosphi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>  <span class="c1"># nx*ny</span>
+    <span class="n">sinlam</span><span class="p">,</span> <span class="n">coslam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lambda_</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lambda_</span><span class="p">)</span>  <span class="c1"># nx*ny</span>
+
+    <span class="n">k11</span> <span class="o">=</span> <span class="n">coslam</span> <span class="o">*</span> <span class="p">(</span><span class="n">sinb</span> <span class="o">*</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">+</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">sinphi</span><span class="p">)</span> <span class="o">-</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">sinp</span>
+    <span class="n">k12</span> <span class="o">=</span> <span class="o">-</span> <span class="n">coslam</span> <span class="o">*</span> <span class="p">(</span><span class="n">sinb</span> <span class="o">*</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">-</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">sinphi</span><span class="p">)</span> <span class="o">+</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">cosp</span>
+    <span class="n">k13</span> <span class="o">=</span> <span class="n">coslam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">+</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="n">sinb</span>
+    <span class="n">k21</span> <span class="o">=</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="p">(</span><span class="n">sinb</span> <span class="o">*</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">+</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">sinphi</span><span class="p">)</span> <span class="o">+</span> <span class="n">coslam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">sinp</span>
+    <span class="n">k22</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="p">(</span><span class="n">sinb</span> <span class="o">*</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">-</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">sinphi</span><span class="p">)</span> <span class="o">-</span> <span class="n">coslam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">cosp</span>
+    <span class="n">k23</span> <span class="o">=</span> <span class="n">sinlam</span> <span class="o">*</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">cosphi</span> <span class="o">-</span> <span class="n">coslam</span> <span class="o">*</span> <span class="n">sinb</span>
+    <span class="n">k31</span> <span class="o">=</span> <span class="o">-</span> <span class="n">sinb</span> <span class="o">*</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">sinphi</span> <span class="o">+</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">cosphi</span>
+    <span class="n">k32</span> <span class="o">=</span> <span class="n">sinb</span> <span class="o">*</span> <span class="n">cosp</span> <span class="o">*</span> <span class="n">sinphi</span> <span class="o">+</span> <span class="n">sinp</span> <span class="o">*</span> <span class="n">cosphi</span>
+    <span class="n">k33</span> <span class="o">=</span> <span class="o">-</span> <span class="n">cosb</span> <span class="o">*</span> <span class="n">sinphi</span>
+
+    <span class="n">bptr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">))</span>
+
+    <span class="n">bptr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">k31</span> <span class="o">*</span> <span class="n">b_xi</span> <span class="o">+</span> <span class="n">k32</span> <span class="o">*</span> <span class="n">b_eta</span> <span class="o">+</span> <span class="n">k33</span> <span class="o">*</span> <span class="n">b_zeta</span>
+    <span class="n">bptr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">k21</span> <span class="o">*</span> <span class="n">b_xi</span> <span class="o">+</span> <span class="n">k22</span> <span class="o">*</span> <span class="n">b_eta</span> <span class="o">+</span> <span class="n">k23</span> <span class="o">*</span> <span class="n">b_zeta</span>
+    <span class="n">bptr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">k11</span> <span class="o">*</span> <span class="n">b_xi</span> <span class="o">+</span> <span class="n">k12</span> <span class="o">*</span> <span class="n">b_eta</span> <span class="o">+</span> <span class="n">k13</span> <span class="o">*</span> <span class="n">b_zeta</span>
+
+    <span class="c1"># Preserve HMI RSUN in WCS metadata for downstream reprojection parity.</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">map_field</span><span class="o">.</span><span class="n">meta</span>
+    <span class="n">map_bp</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">bptr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">header</span><span class="p">)</span>
+    <span class="n">map_bt</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">bptr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">header</span><span class="p">)</span>
+    <span class="n">map_br</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">bptr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">header</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">map_bp</span><span class="p">,</span> <span class="n">map_bt</span><span class="p">,</span> <span class="n">map_br</span></div>
+
+
+
+<div class="viewcode-block" id="ampp_field">
+<a class="viewcode-back" href="../../../autoapi/pyampp/util/compute/index.html#pyampp.util.compute.ampp_field">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ampp_field</span><span class="p">(</span><span class="n">dl_path</span><span class="p">,</span> <span class="n">out_model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a model of coronal magnetic fields, including potential, nlfff and thermal corona model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dl_path (str): Path to the folder where downloaded files (HMI magnetograms) are stored</span>
+<span class="sd">        out_model (str): Path to output HDF5 model file (.h5)</span>
+<span class="sd">        x (float): X coordinate of active region center (arcsec)</span>
+<span class="sd">        y (float): Y coordinate of active region center (arcsec)</span>
+<span class="sd">        dx (int): number of voxels in X direction</span>
+<span class="sd">        dy (int): number of voxels in Y direction</span>
+<span class="sd">        dz (int): number of voxels in Z (vertical, to corona) direction</span>
+<span class="sd">        res (dimensional astropy Quantity)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">dl_path</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">input_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no input data&quot;</span><span class="p">)</span>
+
+    <span class="n">field_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.field.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">incli_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.inclination.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">azimu_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.azimuth.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">disam_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.disambig.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">conti_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.continuum.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">losma_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.magnetogram.fits&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># size_pix = f&quot;[{dx}, {dy}, {dz}]&quot;</span>
+    <span class="c1"># centre = f&quot;[{x}, {y}]&quot;</span>
+    <span class="c1"># wcs_rsun = 6.96e8</span>
+    <span class="n">res_km</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">map_field</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">field_path</span><span class="p">)</span>
+    <span class="n">map_inclination</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">incli_path</span><span class="p">)</span>
+    <span class="n">map_azimuth</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">azimu_path</span><span class="p">)</span>
+    <span class="n">map_disambig</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">disam_path</span><span class="p">)</span>
+
+    <span class="n">map_conti</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">conti_path</span><span class="p">)</span>
+    <span class="n">map_losma</span> <span class="o">=</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">losma_path</span><span class="p">)</span>
+
+    <span class="n">dis</span> <span class="o">=</span> <span class="n">map_disambig</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">map_azimuth</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">map_azimuth</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">dis</span> <span class="o">*</span> <span class="mf">180.</span>
+
+    <span class="n">map_bp</span><span class="p">,</span> <span class="n">map_bt</span><span class="p">,</span> <span class="n">map_br</span> <span class="o">=</span> <span class="n">hmi_b2ptr</span><span class="p">(</span><span class="n">map_field</span><span class="p">,</span> <span class="n">map_inclination</span><span class="p">,</span> <span class="n">map_azimuth</span><span class="p">)</span>
+    <span class="n">box_bx</span> <span class="o">=</span> <span class="n">cutout2box</span><span class="p">(</span><span class="n">map_bp</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">res_km</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="p">[</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+    <span class="n">box_by</span> <span class="o">=</span> <span class="n">cutout2box</span><span class="p">(</span><span class="n">map_bt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">res_km</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="p">[</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+    <span class="n">box_bz</span> <span class="o">=</span> <span class="n">cutout2box</span><span class="p">(</span><span class="n">map_br</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">res_km</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="p">[</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+    <span class="n">box_by</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># earth_observer = SkyCoord(0 * u.deg, 0 * u.deg, 0 * u.km, frame=frames.GeocentricEarthEquatorial, observer=&quot;earth&quot;,</span>
+    <span class="c1">#                           obstime=box_bx.date)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;opening file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">out_model</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;bottom_bounds&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s2">&quot;bx&quot;</span><span class="p">,</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">box_bx</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">box_by</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">box_bz</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
+        <span class="n">bottom</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="n">maglib_lff</span> <span class="o">=</span> <span class="n">mf_lfff</span><span class="p">()</span>
+    <span class="n">maglib_lff</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="n">box_bz</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="n">res1</span> <span class="o">=</span> <span class="n">maglib_lff</span><span class="o">.</span><span class="n">LFFF_cube</span><span class="p">(</span><span class="n">dz</span><span class="p">)</span>
+
+    <span class="n">bx_lff</span><span class="p">,</span> <span class="n">by_lff</span><span class="p">,</span> <span class="n">bz_lff</span> <span class="o">=</span> <span class="p">[</span><span class="n">res1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;bx&quot;</span><span class="p">,</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">)]</span>
+
+    <span class="n">bx_lff</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">box_bx</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># replace bottom boundary of lff solution with initial boundary conditions</span>
+    <span class="n">by_lff</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">box_by</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">bz_lff</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">box_bz</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="n">potential</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s2">&quot;bx&quot;</span><span class="p">,</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">bx_lff</span><span class="p">,</span> <span class="n">by_lff</span><span class="p">,</span> <span class="n">bz_lff</span><span class="p">)):</span>
+        <span class="n">potential</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="n">obs_dr</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">696000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">)</span>  <span class="c1"># dimensionless</span>
+    <span class="n">potential</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;obs_dr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_dr</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">potential</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;res_km&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_km</span>
+
+    <span class="n">maglib</span><span class="o">.</span><span class="n">load_cube_vars</span><span class="p">(</span><span class="n">bx_lff</span><span class="p">,</span> <span class="n">by_lff</span><span class="p">,</span> <span class="n">bz_lff</span><span class="p">,</span> <span class="p">(</span><span class="n">obs_dr</span> <span class="o">*</span> <span class="n">sunpy</span><span class="o">.</span><span class="n">sun</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">radius</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">cm</span><span class="p">))</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">maglib</span><span class="o">.</span><span class="n">NLFFF</span><span class="p">()</span>
+    <span class="n">energy_new</span> <span class="o">=</span> <span class="n">maglib</span><span class="o">.</span><span class="n">energy</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NLFFF energy:     &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">energy_new</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; erg&#39;</span><span class="p">)</span>
+
+    <span class="n">nlfff</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;nlfff&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s2">&quot;bx&quot;</span><span class="p">,</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;bx&quot;</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="s2">&quot;by&quot;</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="s2">&quot;bz&quot;</span><span class="p">])):</span>
+        <span class="n">nlfff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">nlfff</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;energy_erg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_new</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating field lines&quot;</span><span class="p">)</span>
+    <span class="c1"># lines = maglib.lines(seeds=None)</span>
+
+    <span class="n">base_bz</span> <span class="o">=</span> <span class="n">cutout2box</span><span class="p">(</span><span class="n">map_losma</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">res_km</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="p">[</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+    <span class="n">base_ic</span> <span class="o">=</span> <span class="n">cutout2box</span><span class="p">(</span><span class="n">map_conti</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">res_km</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="p">[</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">])</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;base_bz&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">base_bz</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;base_ic&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">base_ic</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">header_field</span> <span class="o">=</span> <span class="n">map_field</span><span class="o">.</span><span class="n">wcs</span><span class="o">.</span><span class="n">to_header</span><span class="p">()</span>
+    <span class="n">field_frame</span> <span class="o">=</span> <span class="n">box_bx</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">heliographic_carrington</span><span class="o">.</span><span class="n">frame</span>
+    <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">field_frame</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">field_frame</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">obs_time</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">map_field</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+    <span class="n">dsun_obs</span> <span class="o">=</span> <span class="n">header_field</span><span class="p">[</span><span class="s2">&quot;DSUN_OBS&quot;</span><span class="p">]</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lon</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lat</span><span class="p">,</span> <span class="s2">&quot;dsun_obs&quot;</span><span class="p">:</span> <span class="n">dsun_obs</span><span class="p">,</span> <span class="s2">&quot;obs_time&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">obs_time</span><span class="o">.</span><span class="n">iso</span><span class="p">)}</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+    <span class="n">out_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="c1"># dr3 = [obs_dr.value, obs_dr.value, obs_dr.value]</span>
+
+    <span class="c1"># chromo_box = combo_model(box, dr3, base_bz.data.T, base_ic.data.T)</span>
+    <span class="c1">#</span>
+    <span class="c1"># chromo_box[&quot;avfield&quot;] = lines[&quot;av_field&quot;].transpose((1, 2, 0))</span>
+    <span class="c1"># chromo_box[&quot;physlength&quot;] = lines[&quot;phys_length&quot;].transpose((1, 2, 0)) * dr3[0]</span>
+    <span class="c1"># chromo_box[&quot;status&quot;] = lines[&quot;voxel_status&quot;].transpose((1, 2, 0))</span>
+    <span class="c1"># out_file.flush()</span>
+    <span class="c1">#</span>
+    <span class="c1"># chromo_ds = out_file.create_group(&quot;chromo&quot;)</span>
+    <span class="c1"># for k in chromo_box.keys():</span>
+    <span class="c1">#     chromo_ds.create_dataset(k, data=chromo_box[k])</span>
+    <span class="c1"># out_file.flush()</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, suncast-org.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

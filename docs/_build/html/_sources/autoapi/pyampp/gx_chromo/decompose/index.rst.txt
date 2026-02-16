@@ -1,0 +1,19 @@
+pyampp.gx_chromo.decompose
+==========================
+
+.. py:module:: pyampp.gx_chromo.decompose
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.gx_chromo.decompose.decompose
+
+
+Module Contents
+---------------
+
+.. py:function:: decompose(mag, cont)
+

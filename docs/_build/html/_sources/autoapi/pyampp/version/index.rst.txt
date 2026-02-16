@@ -1,0 +1,26 @@
+pyampp.version
+==============
+
+.. py:module:: pyampp.version
+
+.. autoapi-nested-parse::
+
+   Package version helper.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   pyampp.version.version
+
+
+Module Contents
+---------------
+
+.. py:data:: version
+   :value: '0.2.0'
+
+

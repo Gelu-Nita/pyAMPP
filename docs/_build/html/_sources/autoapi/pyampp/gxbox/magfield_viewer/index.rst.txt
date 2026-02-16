@@ -1,0 +1,488 @@
+pyampp.gxbox.magfield_viewer
+============================
+
+.. py:module:: pyampp.gxbox.magfield_viewer
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   pyampp.gxbox.magfield_viewer.MagFieldViewer
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   pyampp.gxbox.magfield_viewer.minval
+   pyampp.gxbox.magfield_viewer.maxval
+
+
+Module Contents
+---------------
+
+.. py:function:: minval(min_val)
+
+   Rounds the minimum value to the nearest hundredth.
+
+   :param min_val: float
+       The minimum value to round.
+   :return: float
+       The rounded minimum value.
+
+
+.. py:function:: maxval(max_val)
+
+   Rounds the maximum value to the nearest hundredth.
+
+   :param max_val: float
+       The maximum value to round.
+   :return: float
+       The rounded maximum value.
+
+
+.. py:class:: MagFieldViewer(box, parent=None, box_norm_direction=None, box_view_up=None, time=None, b3dtype='nlfff', *args, **kwargs)
+
+   Bases: :py:obj:`pyvistaqt.BackgroundPlotter`
+
+
+   A class to visualize the magnetic field of a box using PyVista. It inherits from the BackgroundPlotter class.
+
+   :param box: object
+       The box containing magnetic field data.
+   :param parent: object, optional
+       The parent object (default is None).
+
+
+   .. py:attribute:: box
+
+
+   .. py:attribute:: parent
+      :value: None
+
+
+
+   .. py:attribute:: box_norm_direction
+      :value: None
+
+
+
+   .. py:attribute:: box_view_up
+      :value: None
+
+
+
+   .. py:attribute:: updating_flag
+      :value: False
+
+
+
+   .. py:attribute:: spheres
+
+
+   .. py:attribute:: current_sphere_id
+      :value: None
+
+
+
+   .. py:attribute:: next_sphere_id
+      :value: 1
+
+
+
+   .. py:attribute:: current_sphere
+      :value: None
+
+
+
+   .. py:attribute:: sphere_actor
+      :value: None
+
+
+
+   .. py:attribute:: sphere
+      :value: None
+
+
+
+   .. py:attribute:: axes_widget
+      :value: None
+
+
+
+   .. py:attribute:: plane_actor
+      :value: None
+
+
+
+   .. py:attribute:: bottom_slice_actor
+      :value: None
+
+
+
+   .. py:attribute:: streamlines_actor
+      :value: None
+
+
+
+   .. py:attribute:: streamlines
+      :value: None
+
+
+
+   .. py:attribute:: sphere_visible
+      :value: True
+
+
+
+   .. py:attribute:: plane_visible
+      :value: True
+
+
+
+   .. py:attribute:: use_interp
+      :value: True
+
+
+
+   .. py:attribute:: scalar
+      :value: 'bz'
+
+
+
+   .. py:attribute:: previous_params
+
+
+   .. py:attribute:: previous_valid_values
+
+
+   .. py:attribute:: scalar_selector
+      :value: None
+
+
+
+   .. py:attribute:: scalar_selector_items
+      :value: []
+
+
+
+   .. py:attribute:: center_x_input
+      :value: None
+
+
+
+   .. py:attribute:: center_y_input
+      :value: None
+
+
+
+   .. py:attribute:: center_z_input
+      :value: None
+
+
+
+   .. py:attribute:: radius_input
+      :value: None
+
+
+
+   .. py:attribute:: n_points_input
+      :value: None
+
+
+
+   .. py:attribute:: slice_z_input
+      :value: None
+
+
+
+   .. py:attribute:: vmin_input
+      :value: None
+
+
+
+   .. py:attribute:: vmax_input
+      :value: None
+
+
+
+   .. py:attribute:: slice_z_min
+      :value: 0.0
+
+
+
+   .. py:attribute:: slice_z_max
+      :value: 0.0
+
+
+
+   .. py:attribute:: scalar_min
+      :value: 0.0
+
+
+
+   .. py:attribute:: scalar_max
+      :value: 0.0
+
+
+
+   .. py:attribute:: update_button
+      :value: None
+
+
+
+   .. py:attribute:: send_button
+      :value: None
+
+
+
+   .. py:attribute:: parallel_proj_button
+      :value: None
+
+
+
+   .. py:attribute:: timestr
+
+
+   .. py:attribute:: grid_x
+
+
+   .. py:attribute:: grid_y
+
+
+   .. py:attribute:: grid_z
+
+
+   .. py:attribute:: grid_zbase
+
+
+   .. py:attribute:: default_sph_cen_x
+
+
+   .. py:attribute:: default_sph_cen_y
+
+
+   .. py:attribute:: default_sph_cen_z
+
+
+   .. py:method:: print_camera_position(caller, event)
+
+      Prints the camera position whenever the camera is moved.
+
+
+
+   .. py:method:: set_camera_to_LOS_direction()
+
+      Sets the camera to align with the normal direction vector of the observer's line of sight (LoS).
+
+      This function reorients the camera so that it points along the observer's normal direction
+      while ensuring the 'view up' vector is aligned to the target y-axis (0, 1, 0).
+
+      Steps:
+          1. Normalize the provided view up vector.
+          2. Calculate the rotation axis using the cross product of the normalized view up vector
+             and the target y-axis.
+          3. Compute the angle between the normalized view up vector and the target y-axis.
+          4. Generate a rotation matrix using Rodrigues' rotation formula.
+          5. Apply the rotation matrix to adjust the view up vector.
+          6. Set the camera position to align with the normal direction and update the focal point.
+          7. Enable parallel projection for the camera.
+
+      :raises ValueError: If the norm of the view up vector is zero.
+
+
+
+   .. py:method:: add_parallel_projection_button()
+
+      Adds a toggle button for parallel projection to the toolbar.
+
+
+
+   .. py:method:: toggle_parallel_projection(state)
+
+      Toggles the parallel projection mode of the camera.
+
+
+
+   .. py:method:: add_observer_cam_button()
+
+      Adds a button to the toolbar to set the camera to the normal direction.
+
+
+
+   .. py:method:: add_menu_options()
+
+
+   .. py:method:: save_state(default_filename='magfield_viewer_state.pkl')
+
+      Saves the current state of spheres to a file. Prompts the user to select a directory and input a filename.
+
+      :param default_filename: str
+          The default name of the file to save the state data.
+
+
+
+   .. py:method:: load_state(filename=None)
+
+      Loads the state of spheres from a file. Prompts the user to select a file.
+
+
+
+   .. py:method:: add_widgets_to_window()
+
+      Adds the input widgets to the window.
+
+
+
+   .. py:method:: select_sphere(sphere_id)
+
+
+   .. py:method:: deselect_sphere()
+
+      Handles the deselection of a sphere.
+      Clears the inputs and hides the current sphere and its streamlines.
+
+
+
+   .. py:method:: delete_sphere_from_tb(sphere_id)
+
+
+   .. py:method:: validate_input(widget, min_val, max_val, original_value, to_int=False, paired_widget=None, paired_type=None)
+
+      Validates the input of a QLineEdit widget and returns the value if it is valid. If the input is invalid, a warning message is displayed and the original value is restored.
+
+      :param widget: QLineEdit
+          The widget to validate.
+      :param min_val: float
+          The minimum valid value.
+      :param max_val: float
+          The maximum valid value.
+      :param original_value: float
+          The original value of the widget.
+      :param to_int: bool
+          Whether to convert the value to an integer.
+      :param paired_widget: QLineEdit, optional
+          The paired widget to compare the value with.
+      :param paired_type: str, optional
+          The type of comparison to perform with the paired widget.
+      :return: float
+          The valid value.
+
+
+
+   .. py:method:: init_grid()
+
+
+   .. py:method:: init_plot()
+
+      Initializes and displays the plot with the magnetic field data.
+
+
+
+   .. py:method:: update_plot(init=False)
+
+      Updates the plot based on the current input parameters.
+
+
+
+   .. py:method:: update_slice(slice_z, scalar, vmin, vmax, use_interp=True)
+
+      Updates the slice plot based on the given parameters.
+
+      :param slice_z: float
+          The Z coordinate for the slice.
+      :param scalar: str
+          The scalar field to use for the slice.
+      :param vmin: float
+          The minimum value for the color scale.
+      :param vmax: float
+          The maximum value for the color scale.
+
+
+
+   .. py:method:: create_streamlines(center_x, center_y, center_z, radius, n_points)
+
+
+   .. py:method:: update_streamlines(center_x, center_y, center_z, radius, n_points)
+
+      Updates the streamline plot based on the given parameters.
+
+      :param center_x: float
+          The X coordinate of the center of the sphere.
+      :param center_y: float
+          The Y coordinate of the center of the sphere.
+      :param center_z: float
+          The Z coordinate of the center of the sphere.
+      :param radius: float
+          The radius of the sphere.
+      :param n_points: int
+          The number of seed points for the streamlines.
+
+
+
+   .. py:method:: update_sphere()
+
+      Updates the sphere widget based on the current input parameters.
+
+
+
+   .. py:method:: on_lock_z_changed(state)
+
+
+   .. py:method:: update_sphere_visibility(sphere_visible)
+
+      Updates the visibility of the sphere widget.
+
+      :param sphere_visible: bool
+          Whether the sphere widget is visible.
+
+
+
+   .. py:method:: toggle_sphere_visibility(state)
+
+      Toggles the visibility of the sphere widget.
+
+      :param state: int
+          The state of the checkbox (checked or unchecked).
+
+
+
+   .. py:method:: update_plane()
+
+      Updates the plane widget based on the current input parameters.
+
+
+
+   .. py:method:: update_plane_visibility(plane_visible)
+
+      Updates the visibility of the plane widget.
+
+      :param plane_visible: bool
+          Whether the plane widget is visible.
+
+
+
+   .. py:method:: toggle_plane_visibility(state)
+
+      Toggles the visibility of the plane widget.
+
+      :param state: int
+          The state of the checkbox (checked or unchecked).
+
+
+
+   .. py:method:: send_streamlines()
+
+      Sends the streamline data of all spheres to the parent object (if any).
+
+
+
+   .. py:method:: save_box()
+
+
+   .. py:method:: load_box()
+
+
