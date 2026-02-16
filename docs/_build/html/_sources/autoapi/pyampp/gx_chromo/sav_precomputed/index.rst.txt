@@ -1,6 +1,0 @@
-pyampp.gx_chromo.sav_precomputed
-================================
-
-.. py:module:: pyampp.gx_chromo.sav_precomputed
-
-
