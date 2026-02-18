@@ -68,6 +68,7 @@ class MagFieldViewer(BackgroundPlotter):
         self.axes_widget = None
         self.plane_actor = None
         self.bottom_slice_actor = None
+        self.base_map_actor = None
         self.streamlines_actor = None
         self.streamlines = None
         self.sphere_visible = True
@@ -78,6 +79,8 @@ class MagFieldViewer(BackgroundPlotter):
         self.previous_valid_values = {}
         self.scalar_selector = None
         self.scalar_selector_items = []
+        self.base_map_selector = None
+        self.base_map_items = []
         self.center_x_input = None
         self.center_y_input = None
         self.center_z_input = None
@@ -90,9 +93,13 @@ class MagFieldViewer(BackgroundPlotter):
         self.slice_z_max = 0.0
         self.scalar_min = 0.0
         self.scalar_max = 0.0
+        self.base_scalar_min = 0.0
+        self.base_scalar_max = 0.0
         self.update_button = None
         self.send_button = None
         self.parallel_proj_button = None
+        self.base_vmin_input = None
+        self.base_vmax_input = None
         self.timestr = time.to_datetime().strftime("_%Y%m%dT%H%M%S") if time is not None else ''
         if b3dtype in ("pot", "nlfff"):
             self.b3dtype = "corona"
@@ -368,7 +375,8 @@ class MagFieldViewer(BackgroundPlotter):
         field_lines_control_group = QGroupBox("Field Line Browser")
         field_lines_control_layout = QVBoxLayout()
         field_lines_control_group.setLayout(field_lines_control_layout)
-        field_lines_control_group.setMaximumHeight(200)
+        field_lines_control_group.setMinimumHeight(220)
+        field_lines_control_group.setMaximumHeight(320)
         control_layout.addWidget(field_lines_control_group)
 
 
@@ -434,7 +442,9 @@ class MagFieldViewer(BackgroundPlotter):
         properties_panel = QWidget()
         properties_layout = QVBoxLayout()
         properties_panel.setLayout(properties_layout)
-        properties_panel.setMaximumHeight(200)
+        # Keep enough vertical room for Slice Z + Bottom Map + Sphere groups.
+        properties_panel.setMinimumHeight(320)
+        properties_panel.setMaximumHeight(420)
         control_layout.addWidget(properties_panel)
 
         # Add widgets to the layout
@@ -502,6 +512,43 @@ class MagFieldViewer(BackgroundPlotter):
 
         slice_control_group.setLayout(slice_control_layout)
         properties_layout.addWidget(slice_control_group)
+
+        base_control_group = QGroupBox("Bottom Map")
+        base_control_layout = QHBoxLayout()
+
+        base_map_label = QLabel("Map:")
+        base_map_label.setToolTip("Display a fixed base/ref map at the box bottom (z-min plane).")
+        self.base_map_selector = QComboBox()
+        self.base_map_selector.addItem("none")
+        self.base_map_selector.addItems(self.base_map_items)
+        self.base_map_selector.setCurrentText("none")
+        self.base_map_selector.currentTextChanged.connect(self._on_base_map_changed)
+        base_control_layout.addWidget(base_map_label)
+        base_control_layout.addWidget(self.base_map_selector)
+
+        base_vmin_vmax_label = QLabel("Min/Max:")
+        base_vmin_vmax_label.setToolTip("Intensity range for the fixed bottom map.")
+        self.base_vmin_input = QDoubleSpinBox()
+        self.base_vmin_input.setDecimals(2)
+        self.base_vmin_input.setRange(-5e6, 5e6)
+        self.base_vmin_input.setSingleStep(10.0)
+        self.base_vmin_input.setAccelerated(True)
+        self.base_vmin_input.setValue(-1000.0)
+        self.base_vmin_input.valueChanged.connect(lambda: self._on_base_vmin_input_returnPressed(self.base_vmin_input))
+        self.base_vmax_input = QDoubleSpinBox()
+        self.base_vmax_input.setDecimals(2)
+        self.base_vmax_input.setRange(-5e6, 5e6)
+        self.base_vmax_input.setSingleStep(10.0)
+        self.base_vmax_input.setAccelerated(True)
+        self.base_vmax_input.setValue(1000.0)
+        self.base_vmax_input.valueChanged.connect(lambda: self._on_base_vmax_input_returnPressed(self.base_vmax_input))
+        base_control_layout.addWidget(base_vmin_vmax_label)
+        base_control_layout.addWidget(self.base_vmin_input)
+        base_control_layout.addWidget(self.base_vmax_input)
+        base_control_layout.addStretch()
+
+        base_control_group.setLayout(base_control_layout)
+        properties_layout.addWidget(base_control_group)
 
         # Sphere Control Group
         sphere_control_group = QGroupBox("Sphere")
@@ -839,6 +886,43 @@ class MagFieldViewer(BackgroundPlotter):
         """
         self.update_plot()
 
+    @validate_number
+    def _on_base_vmin_input_returnPressed(self, widget):
+        self._update_base_map_from_controls()
+
+    @validate_number
+    def _on_base_vmax_input_returnPressed(self, widget):
+        self._update_base_map_from_controls()
+
+    def _on_base_map_changed(self, _map_name):
+        self._set_base_scalar_range(self.base_map_selector.currentText(), reset_values=True)
+        self._update_base_map_from_controls()
+
+    def _update_base_map_from_controls(self):
+        if self.base_map_selector is None:
+            return
+        base_map = self.base_map_selector.currentText()
+        if base_map == "none" or base_map not in self.grid_bottom.array_names:
+            self.update_base_map("none", 0.0, 1.0)
+            return
+        bmin = self.validate_input(
+            self.base_vmin_input,
+            self.base_scalar_min,
+            self.base_scalar_max,
+            self.previous_valid_values.get(self.base_vmin_input, self.base_scalar_min),
+            paired_widget=self.base_vmax_input,
+            paired_type='vmin',
+        )
+        bmax = self.validate_input(
+            self.base_vmax_input,
+            self.base_scalar_min,
+            self.base_scalar_max,
+            self.previous_valid_values.get(self.base_vmax_input, self.base_scalar_max),
+            paired_widget=self.base_vmin_input,
+            paired_type='vmax',
+        )
+        self.update_base_map(base_map, bmin, bmax)
+
     def validate_input(self, widget, min_val, max_val, original_value, to_int=False, paired_widget=None,
                        paired_type=None):
         '''
@@ -938,12 +1022,45 @@ class MagFieldViewer(BackgroundPlotter):
             self.vmin_input.blockSignals(False)
             self.vmax_input.blockSignals(False)
 
+    def _set_base_scalar_range(self, base_map_name, reset_values=False):
+        if self.base_vmin_input is None or self.base_vmax_input is None:
+            return
+        if base_map_name is None or base_map_name == "none" or base_map_name not in self.grid_bottom.array_names:
+            self.base_vmin_input.setEnabled(False)
+            self.base_vmax_input.setEnabled(False)
+            return
+
+        data = self.grid_bottom[base_map_name]
+        self.base_scalar_min = float(np.nanmin(data))
+        self.base_scalar_max = float(np.nanmax(data))
+        if self.base_scalar_min == self.base_scalar_max:
+            self.base_scalar_min -= 1.0
+            self.base_scalar_max += 1.0
+
+        self.base_vmin_input.blockSignals(True)
+        self.base_vmax_input.blockSignals(True)
+        self.base_vmin_input.setEnabled(True)
+        self.base_vmax_input.setEnabled(True)
+        self.base_vmin_input.setRange(self.base_scalar_min, self.base_scalar_max)
+        self.base_vmax_input.setRange(self.base_scalar_min, self.base_scalar_max)
+        step = max((self.base_scalar_max - self.base_scalar_min) / 200.0, 1.0e-3)
+        self.base_vmin_input.setSingleStep(step)
+        self.base_vmax_input.setSingleStep(step)
+        if reset_values:
+            self.base_vmin_input.setValue(self.base_scalar_min)
+            self.base_vmax_input.setValue(self.base_scalar_max)
+            self.previous_valid_values[self.base_vmin_input] = self.base_scalar_min
+            self.previous_valid_values[self.base_vmax_input] = self.base_scalar_max
+        self.base_vmin_input.blockSignals(False)
+        self.base_vmax_input.blockSignals(False)
+
     def init_grid(self):
         x = self.grid_x
         y = self.grid_y
         z = self.grid_z
 
         self.bottom_name = None
+        self.base_map_items = []
 
         bx = self.box.b3d[self.b3dtype]['bx']
         by = self.box.b3d[self.b3dtype]['by']
@@ -961,16 +1078,50 @@ class MagFieldViewer(BackgroundPlotter):
         self.grid['by'] = by.ravel(order='F')
         self.grid['bz'] = bz.ravel(order='F')
         self.grid['vectors'] = np.c_[self.grid['bx'] , self.grid['by'], self.grid['bz']]
-        self.scalar_selector_items.extend(['bx', 'by', 'bz'])
+        self.scalar_selector_items = ['none', 'bx', 'by', 'bz']
 
         self.grid_bottom = pv.ImageData()
         self.grid_bottom.dimensions = (len(x), len(y), 1)
         self.grid_bottom.spacing = (x[1] - x[0], y[1] - y[0], 0)
         self.grid_bottom.origin = (x.min(), y.min(), z.min())
+
+        base_group = self.box.b3d.get("base", {}) if isinstance(self.box.b3d, dict) else {}
+        if isinstance(base_group, dict):
+            for key in ("bx", "by", "bz", "ic", "chromo_mask"):
+                if key not in base_group:
+                    continue
+                arr = np.asarray(base_group[key])
+                if arr.ndim != 2:
+                    continue
+                # Base maps are stored as (y, x); grid_bottom expects flattened (x, y).
+                if arr.shape != (len(y), len(x)):
+                    continue
+                self.grid_bottom[key] = arr.T.ravel(order='F')
+                self.base_map_items.append(key)
+
+        # Include compatible refmaps (e.g., Vert_current) when they match bottom dimensions.
+        refmaps_group = self.box.b3d.get("refmaps", {}) if isinstance(self.box.b3d, dict) else {}
+        if isinstance(refmaps_group, dict):
+            for ref_name, ref_obj in refmaps_group.items():
+                if not isinstance(ref_obj, dict) or "data" not in ref_obj:
+                    continue
+                arr = np.asarray(ref_obj["data"])
+                if arr.ndim != 2:
+                    continue
+                if arr.shape != (len(y), len(x)):
+                    continue
+                key = str(ref_name)
+                if key in self.grid_bottom.array_names:
+                    continue
+                self.grid_bottom[key] = arr.T.ravel(order='F')
+                if key not in self.base_map_items:
+                    self.base_map_items.append(key)
+
         if self.parent is not None and hasattr(self.parent, "mapBottomSelector") and hasattr(self.parent, "map_bottom"):
             self.bottom_name = self.parent.mapBottomSelector.currentText()
             self.grid_bottom[self.bottom_name] = self.parent.map_bottom.data.T.ravel(order='F')
-            self.scalar_selector_items.append(self.bottom_name)
+            if self.bottom_name not in self.base_map_items:
+                self.base_map_items.append(self.bottom_name)
 
         self._set_slice_slider_range()
         self._set_scalar_range(self.scalar)
@@ -982,6 +1133,8 @@ class MagFieldViewer(BackgroundPlotter):
         """
         self._set_slice_slider_range()
         self._set_scalar_range(self.scalar)
+        self._set_base_scalar_range(self.base_map_selector.currentText() if self.base_map_selector is not None else "none",
+                                    reset_values=True)
 
         def _val(widget):
             if isinstance(widget, QDoubleSpinBox):
@@ -996,7 +1149,9 @@ class MagFieldViewer(BackgroundPlotter):
             self.slice_z_input: _val(self.slice_z_input),
             self.n_points_input: int(self.n_points_input.text()),
             self.vmin_input: _val(self.vmin_input),
-            self.vmax_input: _val(self.vmax_input)
+            self.vmax_input: _val(self.vmax_input),
+            self.base_vmin_input: _val(self.base_vmin_input) if self.base_vmin_input is not None else -1000.0,
+            self.base_vmax_input: _val(self.base_vmax_input) if self.base_vmax_input is not None else 1000.0,
         }
 
         self.update_plot(init=True)
@@ -1029,12 +1184,34 @@ class MagFieldViewer(BackgroundPlotter):
         self.update_plane()
         scalar = self.scalar_selector.currentText()
         self._set_scalar_range(scalar)
+        base_map = self.base_map_selector.currentText() if self.base_map_selector is not None else "none"
+        self._set_base_scalar_range(base_map, reset_values=False)
         slice_z = self.validate_input(self.slice_z_input, 0, self.grid_zmax,
                                       self.previous_valid_values[self.slice_z_input])
         vmin = self.validate_input(self.vmin_input, -5e4, 5e4, self.previous_valid_values[self.vmin_input],
                                    paired_widget=self.vmax_input, paired_type='vmin')
         vmax = self.validate_input(self.vmax_input, -5e4, 5e4, self.previous_valid_values[self.vmax_input],
                                    paired_widget=self.vmin_input, paired_type='vmax')
+        if base_map != "none" and base_map in self.grid_bottom.array_names:
+            bmin = self.validate_input(
+                self.base_vmin_input,
+                self.base_scalar_min,
+                self.base_scalar_max,
+                self.previous_valid_values[self.base_vmin_input],
+                paired_widget=self.base_vmax_input,
+                paired_type='vmin',
+            )
+            bmax = self.validate_input(
+                self.base_vmax_input,
+                self.base_scalar_min,
+                self.base_scalar_max,
+                self.previous_valid_values[self.base_vmax_input],
+                paired_widget=self.base_vmin_input,
+                paired_type='vmax',
+            )
+        else:
+            bmin = vmin
+            bmax = vmax
         sphere_visible = self.viz_sphere_button.isChecked()
         plane_visible = self.plane_visible
         use_interp = self.interp_checkbox.isChecked() if self.interp_checkbox is not None else True
@@ -1050,6 +1227,9 @@ class MagFieldViewer(BackgroundPlotter):
             "vmin": vmin,
             "vmax": vmax,
             "scalar": scalar,
+            "base_map": base_map,
+            "base_vmin": bmin,
+            "base_vmax": bmax,
             "use_interp": use_interp,
             "sphere_visible": sphere_visible,
             "plane_visible": plane_visible
@@ -1068,6 +1248,11 @@ class MagFieldViewer(BackgroundPlotter):
                 current_params['use_interp'] != self.previous_params.get('use_interp'):
             self.update_slice(current_params['slice_z'], current_params['scalar'], current_params['vmin'],
                               current_params['vmax'], current_params['use_interp'])
+
+        if current_params['base_map'] != self.previous_params.get('base_map') or \
+                current_params['base_vmin'] != self.previous_params.get('base_vmin') or \
+                current_params['base_vmax'] != self.previous_params.get('base_vmax'):
+            self.update_base_map(current_params['base_map'], current_params['base_vmin'], current_params['base_vmax'])
 
         if current_params['plane_visible'] != self.previous_params.get('plane_visible'):
             self.update_plane_visibility(current_params['plane_visible'])
@@ -1105,52 +1290,65 @@ class MagFieldViewer(BackgroundPlotter):
         :param vmax: float
             The maximum value for the color scale.
         """
-        if self.bottom_name is not None and scalar == self.bottom_name:
-            # Display the new scalar data as a 2D plane
-            if self.bottom_slice_actor is None:
-                self.bottom_slice_actor = self.add_mesh(self.grid_bottom, scalars=scalar, clim=(vmin, vmax),
-                                                        show_edges=False,
-                                                        cmap='gray', pickable=False, show_scalar_bar=False)
-            else:
+        if scalar == 'none':
+            if self.bottom_slice_actor is not None:
                 self.remove_actor(self.bottom_slice_actor)
-                self.bottom_slice_actor = self.add_mesh(self.grid_bottom, scalars=scalar, clim=(vmin, vmax),
-                                                        show_edges=False,
-                                                        cmap='gray', pickable=False, reset_camera=False,
-                                                        show_scalar_bar=False)
+                self.bottom_slice_actor = None
+            return
+
+        if slice_z==0:
+            slice_z = 1.0e-6
+        if use_interp:
+            new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
+            pref = 'point'
+            scalar_name = scalar
+            scalars = scalar_name
         else:
-            if slice_z==0:
-                slice_z = 1.0e-6
-            if use_interp:
+            spacing_z = self.grid_spacing[2]
+            idx = int(round((slice_z - self.grid.origin[2]) / spacing_z))
+            idx = max(0, min(idx, self.grid_dims[2] - 1))
+            z_pos = slice_z
+
+            nx, ny, nz = self.grid_dims
+            if scalar in ('bx', 'by', 'bz'):
+                cube = self.box.b3d[self.b3dtype][scalar]
+            else:
+                cube = self.box.b3d[self.b3dtype]['bz']
+
+            cube = np.asarray(cube)
+            if cube.ndim == 4 and cube.shape[-1] == 3 and scalar in ('bx', 'by', 'bz'):
+                comp_idx = {'bx': 0, 'by': 1, 'bz': 2}[scalar]
+                cube = cube[..., comp_idx]
+
+            if cube.ndim != 3 and cube.size == nx * ny * nz:
+                cube = cube.reshape((nx, ny, nz), order='F')
+
+            if cube.ndim == 3:
+                slice_data = cube[:, :, idx]
+            elif cube.ndim == 2 and cube.size == nx * ny:
+                slice_data = cube
+            else:
+                # Fallback to interpolated slice if cube shape is unexpected
                 new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
                 pref = 'point'
                 scalar_name = scalar
                 scalars = scalar_name
-            else:
-                spacing_z = self.grid_spacing[2]
-                idx = int(round((slice_z - self.grid.origin[2]) / spacing_z))
-                idx = max(0, min(idx, self.grid_dims[2] - 1))
-                z_pos = slice_z
-
-                nx, ny, nz = self.grid_dims
-                if scalar in ('bx', 'by', 'bz'):
-                    cube = self.box.b3d[self.b3dtype][scalar]
+                if self.bottom_slice_actor is None:
+                    self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
+                                                            cmap='gray', pickable=False, show_scalar_bar=False,
+                                                            preference=pref)
                 else:
-                    cube = self.box.b3d[self.b3dtype]['bz']
+                    self.remove_actor(self.bottom_slice_actor)
+                    self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
+                                                            cmap='gray', pickable=False, reset_camera=False,
+                                                            show_scalar_bar=False, preference=pref)
+                return
 
-                cube = np.asarray(cube)
-                if cube.ndim == 4 and cube.shape[-1] == 3 and scalar in ('bx', 'by', 'bz'):
-                    comp_idx = {'bx': 0, 'by': 1, 'bz': 2}[scalar]
-                    cube = cube[..., comp_idx]
-
-                if cube.ndim != 3 and cube.size == nx * ny * nz:
-                    cube = cube.reshape((nx, ny, nz), order='F')
-
-                if cube.ndim == 3:
-                    slice_data = cube[:, :, idx]
-                elif cube.ndim == 2 and cube.size == nx * ny:
-                    slice_data = cube
+            if slice_data.size != nx * ny:
+                if slice_data.size == nx * ny:
+                    slice_data = slice_data.reshape((nx, ny), order='F')
                 else:
-                    # Fallback to interpolated slice if cube shape is unexpected
+                    # Fallback to interpolated slice if reshaping is impossible
                     new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
                     pref = 'point'
                     scalar_name = scalar
@@ -1166,46 +1364,59 @@ class MagFieldViewer(BackgroundPlotter):
                                                                 show_scalar_bar=False, preference=pref)
                     return
 
-                if slice_data.size != nx * ny:
-                    if slice_data.size == nx * ny:
-                        slice_data = slice_data.reshape((nx, ny), order='F')
-                    else:
-                        # Fallback to interpolated slice if reshaping is impossible
-                        new_slice = self.grid.slice(normal='z', origin=(self.grid.origin[0], self.grid.origin[1], slice_z))
-                        pref = 'point'
-                        scalar_name = scalar
-                        scalars = scalar_name
-                        if self.bottom_slice_actor is None:
-                            self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
-                                                                    cmap='gray', pickable=False, show_scalar_bar=False,
-                                                                    preference=pref)
-                        else:
-                            self.remove_actor(self.bottom_slice_actor)
-                            self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
-                                                                    cmap='gray', pickable=False, reset_camera=False,
-                                                                    show_scalar_bar=False, preference=pref)
-                        return
+            flat_slice = slice_data.ravel(order='F')
+            spacing_x = (self.grid_xmax - self.grid_xmin) / float(nx)
+            spacing_y = (self.grid_ymax - self.grid_ymin) / float(ny)
+            scalar_name = "slice_scalar"
+            new_slice = pv.ImageData(dimensions=(nx + 1, ny + 1, 1),
+                                     spacing=(spacing_x, spacing_y, 1),
+                                     origin=(self.grid_xmin, self.grid_ymin, z_pos))
+            new_slice.cell_data[scalar_name] = flat_slice
+            new_slice.set_active_scalars(scalar_name, preference='cell')
+            pref = 'cell'
+            scalars = scalar_name
+        if self.bottom_slice_actor is None:
+            self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
+                                                    cmap='gray', pickable=False, show_scalar_bar=False,
+                                                    preference=pref)
+        else:
+            self.remove_actor(self.bottom_slice_actor)
+            self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
+                                                    cmap='gray', pickable=False, reset_camera=False,
+                                                    show_scalar_bar=False, preference=pref)
 
-                flat_slice = slice_data.ravel(order='F')
-                spacing_x = (self.grid_xmax - self.grid_xmin) / float(nx)
-                spacing_y = (self.grid_ymax - self.grid_ymin) / float(ny)
-                scalar_name = "slice_scalar"
-                new_slice = pv.ImageData(dimensions=(nx + 1, ny + 1, 1),
-                                         spacing=(spacing_x, spacing_y, 1),
-                                         origin=(self.grid_xmin, self.grid_ymin, z_pos))
-                new_slice.cell_data[scalar_name] = flat_slice
-                new_slice.set_active_scalars(scalar_name, preference='cell')
-                pref = 'cell'
-                scalars = scalar_name
-            if self.bottom_slice_actor is None:
-                self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
-                                                        cmap='gray', pickable=False, show_scalar_bar=False,
-                                                        preference=pref)
-            else:
-                self.remove_actor(self.bottom_slice_actor)
-                self.bottom_slice_actor = self.add_mesh(new_slice, scalars=scalars, clim=(vmin, vmax), show_edges=False,
-                                                        cmap='gray', pickable=False, reset_camera=False,
-                                                        show_scalar_bar=False, preference=pref)
+    def update_base_map(self, base_map, vmin, vmax):
+        """
+        Render a fixed bottom-plane base map independently of the moving z-slice.
+        """
+        if base_map is None or base_map == "none" or base_map not in self.grid_bottom.array_names:
+            if self.base_map_actor is not None:
+                self.remove_actor(self.base_map_actor)
+                self.base_map_actor = None
+            return
+
+        if self.base_map_actor is None:
+            self.base_map_actor = self.add_mesh(
+                self.grid_bottom,
+                scalars=base_map,
+                clim=(vmin, vmax),
+                show_edges=False,
+                cmap='gray',
+                pickable=False,
+                show_scalar_bar=False,
+            )
+        else:
+            self.remove_actor(self.base_map_actor)
+            self.base_map_actor = self.add_mesh(
+                self.grid_bottom,
+                scalars=base_map,
+                clim=(vmin, vmax),
+                show_edges=False,
+                cmap='gray',
+                pickable=False,
+                reset_camera=False,
+                show_scalar_bar=False,
+            )
 
     def create_streamlines(self, center_x, center_y, center_z, radius, n_points):
         self.streamlines = self.grid.streamlines(vectors='vectors', source_center=(center_x, center_y, center_z),

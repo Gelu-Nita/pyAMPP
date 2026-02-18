@@ -56,3 +56,32 @@ Start from a specific map:
 .. code-block:: bash
 
    gxrefmap-view /path/to/model.h5 --start AIA_94
+
+h5tree
+------
+
+``h5tree`` prints a compact tree of HDF5 groups/datasets and their shapes/dtypes.
+
+Metadata behavior:
+
+- Metadata values (``metadata/*``) are shown by default.
+- Use ``--no-metadata`` to suppress metadata value lines.
+- Use ``--meta`` to print only metadata values (no tree output).
+
+Usage:
+
+.. code-block:: bash
+
+   h5tree /path/to/model.h5
+
+Suppress metadata values:
+
+.. code-block:: bash
+
+   h5tree /path/to/model.h5 --no-metadata
+
+Metadata-only mode:
+
+.. code-block:: bash
+
+   h5tree /path/to/model.h5 --meta

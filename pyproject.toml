@@ -57,6 +57,8 @@ zip-safe = false
 include-package-data = true
 
 [tool.setuptools.packages.find]
+include = ["pyampp*"]
+exclude = ["build*", "docs*", "examples*", "reports*"]
 
 [tool.pytest.ini_options]
 testpaths = [

@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import warnings
+import tempfile
 try:
     from pyvista import PyVistaDeprecationWarning
 except Exception:
@@ -20,6 +21,47 @@ from sunpy.sun import constants as sun_consts
 from pyampp.gxbox.boxutils import read_b3d_h5
 from pyampp.gxbox.magfield_viewer import MagFieldViewer
 from PyQt5.QtWidgets import QApplication, QFileDialog
+
+
+def _decode_meta_text(value) -> str:
+    if isinstance(value, (bytes, bytearray)):
+        return value.decode("utf-8", "ignore")
+    if isinstance(value, np.ndarray) and value.shape == ():
+        item = value.item()
+        if isinstance(item, (bytes, bytearray)):
+            return item.decode("utf-8", "ignore")
+        return str(item)
+    return str(value)
+
+
+def _to_xyz_if_zyx(arr: np.ndarray) -> np.ndarray:
+    if arr.ndim == 3:
+        return np.transpose(arr, (2, 1, 0))
+    if arr.ndim == 4 and arr.shape[-1] == 3:
+        return np.transpose(arr, (2, 1, 0, 3))
+    if arr.ndim == 4 and arr.shape[0] == 3:
+        # (c, z, y, x) -> (x, y, z, c)
+        return np.transpose(arr, (3, 2, 1, 0))
+    return arr
+
+
+def normalize_viewer_axis_order(b3d: dict) -> dict:
+    """
+    Convert canonical H5 zyx cubes into viewer xyz cubes.
+    MagFieldViewer expects (x, y, z).
+    """
+    meta = b3d.get("metadata", {}) if isinstance(b3d, dict) else {}
+    axis_order = _decode_meta_text(meta.get("axis_order_3d", "")).strip().lower()
+    if axis_order != "zyx":
+        return b3d
+
+    for model_key in ("corona", "chromo", "nlfff", "pot"):
+        if model_key not in b3d or not isinstance(b3d[model_key], dict):
+            continue
+        for comp in ("bx", "by", "bz", "bcube", "chromo_bcube"):
+            if comp in b3d[model_key]:
+                b3d[model_key][comp] = _to_xyz_if_zyx(np.asarray(b3d[model_key][comp]))
+    return b3d
 
 
 @dataclass
@@ -45,6 +87,8 @@ def infer_dims(b3d: dict) -> np.ndarray:
         if key in b3d and "bx" in b3d[key]:
             return np.array(b3d[key]["bx"].shape, dtype=int)
     if "chromo" in b3d:
+        if "bx" in b3d["chromo"]:
+            return np.array(b3d["chromo"]["bx"].shape, dtype=int)
         if "bcube" in b3d["chromo"]:
             return np.array(b3d["chromo"]["bcube"].shape[:3], dtype=int)
         if "chromo_bcube" in b3d["chromo"]:
@@ -94,11 +138,11 @@ def main() -> int:
         start_dir = Path(args.start_dir).expanduser() if args.start_dir else Path.cwd()
         if not start_dir.exists() or not start_dir.is_dir():
             start_dir = Path.cwd()
-        dialog = QFileDialog(None, "Open HDF5 Model")
+        dialog = QFileDialog(None, "Open Model (HDF5 or SAV)")
         # Native macOS picker may ignore selectFile(); use Qt dialog for reliable preselection.
         dialog.setOption(QFileDialog.DontUseNativeDialog, True)
         dialog.setFileMode(QFileDialog.ExistingFile)
-        dialog.setNameFilter("HDF5 Files (*.h5);;All Files (*)")
+        dialog.setNameFilter("Model Files (*.h5 *.sav);;HDF5 Files (*.h5);;SAV Files (*.sav);;All Files (*)")
         if h5_arg:
             candidate = Path(h5_arg).expanduser()
             dialog.setDirectory(str(candidate.parent if candidate.parent.exists() else start_dir))
@@ -112,8 +156,25 @@ def main() -> int:
             return 0
         h5_arg = selected[0]
 
-    h5_path = Path(h5_arg).expanduser().resolve()
+    model_path = Path(h5_arg).expanduser().resolve()
+    temp_h5_path = None
+    if model_path.suffix.lower() == ".sav":
+        try:
+            from pyampp.tests.build_h5_from_sav import build_h5_from_sav
+        except Exception as exc:
+            raise RuntimeError(
+                "SAV input requires converter module 'pyampp.tests.build_h5_from_sav'. "
+                "Run conversion manually to H5, then reopen."
+            ) from exc
+        tmp_dir = Path(tempfile.mkdtemp(prefix="pyampp_view_h5_"))
+        temp_h5_path = tmp_dir / f"{model_path.stem}.viewer.h5"
+        build_h5_from_sav(sav_path=model_path, out_h5=temp_h5_path, template_h5=None)
+        h5_path = temp_h5_path
+        print(f"Converted SAV to temporary HDF5: {h5_path}")
+    else:
+        h5_path = model_path
     b3d = read_b3d_h5(str(h5_path))
+    b3d = normalize_viewer_axis_order(b3d)
 
     dims = infer_dims(b3d)
     obs_time = infer_time(b3d)
@@ -151,6 +212,13 @@ def main() -> int:
     viewer.show()
     if owns_app:
         app.exec_()
+    # Temporary conversion artifact can be removed after viewer exits.
+    if temp_h5_path is not None:
+        try:
+            temp_h5_path.unlink(missing_ok=True)
+            temp_h5_path.parent.rmdir()
+        except Exception:
+            pass
     return 0
 
 

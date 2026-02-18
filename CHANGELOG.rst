@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- ``h5tree`` now prints ``metadata/*`` values by default.
+- Replaced ``--show-metadata`` with ``--no-metadata`` to explicitly suppress metadata output.
+- Added ``--meta`` mode to print only ``metadata/*`` values (without tree output).
+- Simplified GUI launcher commands: removed ``gxampp`` alias; use ``pyampp`` as the single launcher.
+
 0.2.0
 -----
 

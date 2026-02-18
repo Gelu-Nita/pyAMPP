@@ -186,6 +186,7 @@ After installation, the following commands become available:
 - ``gxbox``: Launch the modeling/visualization GUI.
 - ``gxbox-view``: Open an existing HDF5 model in the 3D viewer.
 - ``gxrefmap-view``: Open base/refmaps from an HDF5 model in a 2D map browser.
+- ``h5tree``: Print an HDF5 tree (metadata shown by default; ``--no-metadata`` hides metadata, ``--meta`` prints metadata only).
 - ``gx-idl2fov2box``: Translate IDL ``gx_fov2box`` execute strings (or SAV ``EXECUTE``) into Python ``gx-fov2box`` commands.
 
 License

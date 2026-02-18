@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+import tempfile
 
 import h5py
 import numpy as np
@@ -43,13 +44,17 @@ def _safe_header_from_string(text: str) -> fits.Header:
         if not raw:
             continue
         key = raw[:8].strip()
-        if not key or key in ("END", "CONTINUE"):
+        if not key or key in ("END", "CONTINUE", "COMMENT", "HISTORY"):
             continue
         line = raw
         if len(line) < 80:
             line = line.ljust(80)
         if len(line) > 80:
             line = line[:80]
+        # Only parse FITS value cards (column 9 is '=').
+        # This avoids warnings when 'base/index' contains an IDL tuple dump.
+        if len(line) < 10 or line[8] != "=":
+            continue
         try:
             card = fits.Card.fromstring(line)
         except Exception:
@@ -96,6 +101,25 @@ def _collect_maps(h5f: h5py.File) -> list[MapSpec]:
                 )
 
     return specs
+
+
+def _resolve_model_to_h5(path: Path) -> tuple[Path, Optional[Path]]:
+    """Return an HDF5 path, converting SAV input to temporary HDF5 when needed."""
+    path = path.expanduser().resolve()
+    if path.suffix.lower() != ".sav":
+        return path, None
+    try:
+        from pyampp.tests.build_h5_from_sav import build_h5_from_sav
+    except Exception as exc:
+        raise RuntimeError(
+            "SAV input requires converter module 'pyampp.tests.build_h5_from_sav'. "
+            "Run conversion manually to H5, then reopen."
+        ) from exc
+    tmp_dir = Path(tempfile.mkdtemp(prefix="pyampp_refmap_view_"))
+    tmp_h5 = tmp_dir / f"{path.stem}.viewer.h5"
+    build_h5_from_sav(sav_path=path, out_h5=tmp_h5, template_h5=None)
+    print(f"Converted SAV to temporary HDF5: {tmp_h5}")
+    return tmp_h5, tmp_h5
 
 
 class RefmapViewer(QtWidgets.QMainWindow):
@@ -291,6 +315,8 @@ def main(
         raise typer.Exit(code=0)
     if h5_path is None:
         h5_path = h5
+    temp_h5 = None
+    h5_path, temp_h5 = _resolve_model_to_h5(h5_path)
 
     with h5py.File(h5_path, "r") as h5f:
         specs = _collect_maps(h5f)
@@ -307,6 +333,12 @@ def main(
     viewer.resize(900, 700)
     viewer.show()
     app_qt.exec_()
+    if temp_h5 is not None:
+        try:
+            temp_h5.unlink(missing_ok=True)
+            temp_h5.parent.rmdir()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

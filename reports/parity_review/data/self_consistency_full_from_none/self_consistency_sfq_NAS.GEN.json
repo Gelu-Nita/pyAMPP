@@ -1,0 +1,28 @@
+{
+  "input_type": "h5",
+  "input": "/tmp/pyampp_models_full_sfq/2025-11-26/hmi.M_720s.20251126_154752.W28S12CR.CEA.NAS.GEN.h5",
+  "title": "Self-consistency SFQ NAS.GEN: base vs corona z=0",
+  "metrics": {
+    "bx": {
+      "mae": 0.0,
+      "rmse": 0.0,
+      "corr": 1.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "by": {
+      "mae": 0.0,
+      "rmse": 0.0,
+      "corr": 1.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "bz": {
+      "mae": 0.0,
+      "rmse": 0.0,
+      "corr": 1.0,
+      "min": 0.0,
+      "max": 0.0
+    }
+  }
+}

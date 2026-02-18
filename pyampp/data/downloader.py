@@ -3,7 +3,7 @@ import os
 import astropy.units as u
 from sunpy.net import Fido, attrs as a
 from glob import glob
-from datetime import timedelta
+from datetime import timedelta, datetime
 import re
 
 class SDOImageDownloader:
@@ -28,7 +28,8 @@ class SDOImageDownloader:
         self.uv = uv
         self.euv = euv
         self.hmi = hmi
-        self.path = os.path.join(data_dir, time.datetime.strftime('%Y%m%d'))
+        # Use IDL-compatible date folder layout.
+        self.path = os.path.join(data_dir, time.datetime.strftime('%Y-%m-%d'))
         self._prepare_directory()
         self.existence_report = self._check_files_exist(self.path)
 
@@ -53,19 +54,34 @@ class SDOImageDownloader:
         """
         patterns = {
             'euv': {
-                pb: os.path.join(base_dir, f'aia.lev1_euv_12s.*.{pb}.image_lev1.fits') for pb in AIA_EUV_PASSBANDS
+                pb: [
+                    os.path.join(base_dir, f'aia.lev1_euv_12s.*.{pb}.image_lev1.fits'),
+                    os.path.join(base_dir, f'aia.lev1_euv_12s.*.image.{pb}.fits'),
+                ] for pb in AIA_EUV_PASSBANDS
             },
             'uv': {
-                pb: os.path.join(base_dir, f'aia.lev1_uv_24s.*.{pb}.image_lev1.fits') for pb in AIA_UV_PASSBANDS
+                pb: [
+                    os.path.join(base_dir, f'aia.lev1_uv_24s.*.{pb}.image_lev1.fits'),
+                    os.path.join(base_dir, f'aia.lev1_uv_24s.*.image.{pb}.fits'),
+                ] for pb in AIA_UV_PASSBANDS
             },
             'hmi_b': {
-                seg: os.path.join(base_dir, f'hmi.b_720s.*_TAI.{seg}.fits') for seg in HMI_B_SEGMENTS
+                seg: [
+                    os.path.join(base_dir, f'hmi.b_720s.*_TAI.{seg}.fits'),
+                    os.path.join(base_dir, f'hmi.B_720s.*_TAI.{seg}.fits'),
+                ] for seg in HMI_B_SEGMENTS
             },
             'hmi_m': {
-                'magnetogram': os.path.join(base_dir, 'hmi.m_720s.*_TAI*.magnetogram.fits')
+                'magnetogram': [
+                    os.path.join(base_dir, 'hmi.m_720s.*_TAI*.magnetogram.fits'),
+                    os.path.join(base_dir, 'hmi.M_720s.*_TAI*.magnetogram.fits'),
+                ]
             },
             'hmi_ic': {
-                'continuum': os.path.join(base_dir, 'hmi.ic_nolimbdark_720s.*_TAI*.continuum.fits')
+                'continuum': [
+                    os.path.join(base_dir, 'hmi.ic_nolimbdark_720s.*_TAI*.continuum.fits'),
+                    os.path.join(base_dir, 'hmi.Ic_noLimbDark_720s.*_TAI*.continuum.fits'),
+                ]
             }
         }
         return patterns
@@ -95,27 +111,37 @@ class SDOImageDownloader:
 
         def file_within_tolerance(filepath, tolerance):
             filename = os.path.basename(filepath)
-            timestamp_str = re.search(r'\d{4}-\d{2}-\d{2}T\d{6}Z', filename)
-            if not timestamp_str:
-                timestamp_str = re.search(r'\d{8}_\d{6}_TAI', filename)
-            if timestamp_str:
-                file_time = self.time.strptime(timestamp_str.group(), '%Y%m%d_%H%M%S_TAI' if '_' in timestamp_str.group() else '%Y-%m-%dT%H%M%SZ')
-                return round(abs(file_time - self.time).sec, 2) <= tolerance.total_seconds()
+            match_aia = re.search(r'\d{4}-\d{2}-\d{2}T\d{6}Z', filename)
+            if match_aia:
+                file_dt = datetime.strptime(match_aia.group(), '%Y-%m-%dT%H%M%SZ')
+                return abs((file_dt - self.time.datetime).total_seconds()) <= tolerance.total_seconds()
+
+            match_hmi = re.search(r'\d{8}_\d{6}_TAI', filename)
+            if match_hmi:
+                file_dt = datetime.strptime(match_hmi.group(), '%Y%m%d_%H%M%S_TAI')
+                return abs((file_dt - self.time.datetime).total_seconds()) <= tolerance.total_seconds()
+
             return False
+
+        def find_matching_files(pattern_spec, tolerance):
+            if isinstance(pattern_spec, str):
+                pattern_spec = [pattern_spec]
+            all_matches = []
+            for pattern in pattern_spec:
+                all_matches.extend(glob(pattern))
+            unique_matches = sorted(set(all_matches))
+            return [f for f in unique_matches if file_within_tolerance(f, tolerance)]
 
         if returnfilelist:
             for category, patterns_dict in patterns.items():
                 for key, pattern in patterns_dict.items():
-                    found_files = glob(pattern)
-                    found_files = glob(pattern)
-                    found_files = [f for f in found_files if file_within_tolerance(f, time_tolerances[category])]
+                    found_files = find_matching_files(pattern, time_tolerances[category])
                     existence_report[key] = found_files[0] if found_files else None
         else:
             for category, patterns_dict in patterns.items():
                 existence_report[category] = {}
                 for key, pattern in patterns_dict.items():
-                    found_files = glob(pattern)
-                    found_files = [f for f in found_files if file_within_tolerance(f, time_tolerances[category])]
+                    found_files = find_matching_files(pattern, time_tolerances[category])
                     existence_report[category][key] = bool(found_files)
         return existence_report
 

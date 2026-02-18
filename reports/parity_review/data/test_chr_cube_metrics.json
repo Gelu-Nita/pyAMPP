@@ -1,0 +1,43 @@
+{
+  "h5": "/Users/gelu/Library/CloudStorage/Dropbox/@Projects/@SUNCAST-ORG/gximagecomputing/test_data/test.chr.h5",
+  "sav": "/Users/gelu/Library/CloudStorage/Dropbox/@Projects/@SUNCAST-ORG/gximagecomputing/test_data/test.chr.sav",
+  "Bx": {
+    "shape": [
+      100,
+      100,
+      150
+    ],
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "mean_abs_ref": 14.106522935264309,
+    "rel_mae": 0.0,
+    "corr": 1.0
+  },
+  "By": {
+    "shape": [
+      100,
+      100,
+      150
+    ],
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "mean_abs_ref": 10.247944042197197,
+    "rel_mae": 0.0,
+    "corr": 1.0
+  },
+  "Bz": {
+    "shape": [
+      100,
+      100,
+      150
+    ],
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "mean_abs_ref": 21.45843230175814,
+    "rel_mae": 0.0,
+    "corr": 1.0
+  }
+}

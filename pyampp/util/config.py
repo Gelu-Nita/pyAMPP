@@ -11,7 +11,7 @@ def setup_directories():
 
     # Define subdirectories within the base directory
     sample_data_dir = os.path.join(base_dir, 'sample')
-    download_dir = os.path.join(base_dir, 'download')
+    download_dir = os.path.join(base_dir, 'jsoc_cache')
     gxmodel_dir = os.path.join(base_dir, 'gx_models')
 
     # Ensure these directories exist

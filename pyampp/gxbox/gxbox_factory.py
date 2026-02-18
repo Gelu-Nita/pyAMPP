@@ -28,7 +28,15 @@ import pyampp
 from pyampp.data import downloader
 from pyampp.gxbox.box import Box
 from pyampp.gx_chromo.decompose import decompose
-from pyampp.gxbox.boxutils import hmi_b2ptr, hmi_disambig, read_b3d_h5, write_b3d_h5, compute_vertical_current
+from pyampp.gxbox.boxutils import (
+    hmi_b2ptr,
+    hmi_disambig,
+    read_b3d_h5,
+    write_b3d_h5,
+    compute_vertical_current,
+    load_sunpy_map_compat,
+)
+from pyampp.gxbox.gx_box2id import gx_box2id
 from pyampp.gxbox.magfield_viewer import MagFieldViewer
 from pyampp.util.config import *
 
@@ -264,23 +272,115 @@ class GxBox(QMainWindow):
         base = self._stage_file_base()
         return out_dir / f"{base}.{stage_tag}.h5"
 
-    def _make_gen_chromo(self, chromo_box: dict) -> dict:
-        gen_keys = [
-            "dr",
-            "bcube",
+    def _make_lines_group(self, lines: dict, dr3: np.ndarray) -> dict:
+        group = {"dr": np.asarray(dr3, dtype=float)}
+        for key in (
             "start_idx",
             "end_idx",
+            "seed_idx",
+            "apex_idx",
+            "codes",
             "av_field",
             "phys_length",
             "voxel_status",
-            "apex_idx",
-            "codes",
-            "seed_idx",
-        ]
-        gen = {k: chromo_box[k] for k in gen_keys if k in chromo_box}
-        if "attrs" in chromo_box:
-            gen["attrs"] = chromo_box["attrs"]
-        return gen
+        ):
+            if key in lines:
+                group[key] = lines[key]
+        return group
+
+    def _make_chromo_group(self, chromo_box: dict) -> dict:
+        group = {}
+        for key in (
+            "chromo_idx",
+            "chromo_n",
+            "chromo_t",
+            "n_p",
+            "n_hi",
+            "n_htot",
+            "tr",
+            "tr_h",
+            "chromo_layers",
+            "dz",
+            "chromo_mask",
+        ):
+            if key in chromo_box:
+                group[key] = chromo_box[key]
+
+        chromo_bcube = chromo_box.get("chromo_bcube")
+        if isinstance(chromo_bcube, np.ndarray) and chromo_bcube.ndim == 4 and chromo_bcube.shape[-1] == 3:
+            group["bx"] = chromo_bcube[:, :, :, 0]
+            group["by"] = chromo_bcube[:, :, :, 1]
+            group["bz"] = chromo_bcube[:, :, :, 2]
+        return group
+
+    @staticmethod
+    def _to_h5_2d(arr: np.ndarray, ny: int, nx: int) -> np.ndarray:
+        a = np.asarray(arr)
+        if a.ndim != 2:
+            return a
+        if a.shape == (ny, nx):
+            return a
+        if a.shape == (nx, ny):
+            return a.T
+        raise ValueError(f"Cannot normalize 2D map shape {a.shape} to (ny,nx)=({ny},{nx})")
+
+    @staticmethod
+    def _to_h5_3d(arr: np.ndarray, ny: int, nx: int) -> np.ndarray:
+        a = np.asarray(arr)
+        if a.ndim != 3:
+            return a
+        if a.shape[1:] == (ny, nx):
+            return a
+        if a.shape[:2] == (ny, nx):
+            return a.transpose((2, 0, 1))
+        if a.shape[:2] == (nx, ny):
+            return a.transpose((2, 1, 0))
+        if a.shape[1:] == (nx, ny):
+            return a.transpose((0, 2, 1))
+        raise ValueError(f"Cannot normalize 3D cube shape {a.shape} to (nz,ny,nx) with (ny,nx)=({ny},{nx})")
+
+    def _normalize_stage_for_h5(self, stage_box: dict) -> dict:
+        out = dict(stage_box)
+        if "base" not in out:
+            return out
+        base = dict(out["base"])
+        if "bx" in base:
+            ny, nx = np.asarray(base["bx"]).shape
+        elif "bz" in base:
+            ny, nx = np.asarray(base["bz"]).shape
+        else:
+            out["base"] = base
+            return out
+
+        for k in ("bx", "by", "bz", "ic", "chromo_mask"):
+            if k in base:
+                base[k] = self._to_h5_2d(base[k], ny, nx)
+        out["base"] = base
+
+        if "corona" in out and isinstance(out["corona"], dict):
+            corona = dict(out["corona"])
+            for k in ("bx", "by", "bz"):
+                if k in corona:
+                    corona[k] = self._to_h5_3d(corona[k], ny, nx)
+            out["corona"] = corona
+
+        if "chromo" in out and isinstance(out["chromo"], dict):
+            chromo = dict(out["chromo"])
+            for k in ("bx", "by", "bz", "dz"):
+                if k in chromo:
+                    chromo[k] = self._to_h5_3d(chromo[k], ny, nx)
+            for k in ("tr", "tr_h", "chromo_mask"):
+                if k in chromo:
+                    chromo[k] = self._to_h5_2d(chromo[k], ny, nx)
+            out["chromo"] = chromo
+
+        if "grid" in out and isinstance(out["grid"], dict):
+            grid = dict(out["grid"])
+            for k in ("voxel_id", "dz"):
+                if k in grid and np.asarray(grid[k]).ndim == 3:
+                    grid[k] = self._to_h5_3d(grid[k], ny, nx)
+            out["grid"] = grid
+        return out
 
     def _last_stage_tag(self) -> str:
         if self.stop_after:
@@ -360,15 +460,16 @@ class GxBox(QMainWindow):
 
     def _save_bounds(self) -> None:
         map_bz = self.loadmap("br")
-        map_bx = -self.loadmap("bt")
-        map_by = self.loadmap("bp")
+        # Match GX/IDL base convention: bx := bp, by := -bt.
+        map_bx = self.loadmap("bp")
+        map_by = -self.loadmap("bt")
         map_bz = map_bz.reproject_to(self.bottom_wcs_header, algorithm="exact")
         map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="exact")
         map_by = map_by.reproject_to(self.bottom_wcs_header, algorithm="exact")
         obs_dr = self.box_res.to(u.km) / self._rsun_km()
         dr3 = [obs_dr.value, obs_dr.value, obs_dr.value]
         stage_box = {
-            "bounds": {
+            "corona": {
                 "bx": map_bx.data,
                 "by": map_by.data,
                 "bz": map_bz.data,
@@ -380,8 +481,9 @@ class GxBox(QMainWindow):
     def _get_base_group(self) -> dict:
         if self._base_cache is not None:
             return self._base_cache
-        map_bx = -self.loadmap("bt")
-        map_by = self.loadmap("bp")
+        # Match GX/IDL base convention: bx := bp, by := -bt.
+        map_bx = self.loadmap("bp")
+        map_by = -self.loadmap("bt")
         map_bz = self.loadmap("br")
         map_ic = self.loadmap("continuum")
         map_bx = map_bx.reproject_to(self.bottom_wcs_header, algorithm="exact")
@@ -415,8 +517,9 @@ class GxBox(QMainWindow):
 
         vert_current_error = None
         try:
-            map_bx = -self.loadmap("bt")
-            map_by = self.loadmap("bp")
+            # Match GX/IDL base convention: bx := bp, by := -bt.
+            map_bx = self.loadmap("bp")
+            map_by = -self.loadmap("bt")
             map_bz = self.loadmap("br")
             vc_header = map_bx.wcs.to_header().tostring(sep="\n", endcard=True)
             rsun_arcsec = self.loadmap("magnetogram").rsun_obs.to_value(u.arcsec)
@@ -452,11 +555,42 @@ class GxBox(QMainWindow):
             stage_box["base"] = self._get_base_group()
         if "refmaps" not in stage_box:
             stage_box["refmaps"] = self._get_refmaps()
+        if "corona" in stage_box:
+            corona = stage_box["corona"]
+            voxel_id, corona_base = gx_box2id(
+                {"corona": corona, "lines": stage_box.get("lines"), "chromo": stage_box.get("chromo")},
+                return_corona_base=True,
+            )
+            if corona_base is not None:
+                corona["corona_base"] = int(corona_base)
+            stage_box["corona"] = corona
+            dr = np.asarray(corona.get("dr", [1.0, 1.0, 1.0]), dtype=float)
+            grid = {
+                "dx": float(dr[0]),
+                "dy": float(dr[1]),
+                "dz": np.array([float(dr[2])], dtype=float),
+                "voxel_id": voxel_id,
+            }
+            if "chromo" in stage_box and isinstance(stage_box["chromo"], dict) and "dz" in stage_box["chromo"]:
+                grid["dz"] = stage_box["chromo"]["dz"]
+            stage_box["grid"] = grid
         stage_id = f"{self._stage_file_base()}.{stage_tag}"
         if self.execute_cmd:
-            stage_box["metadata"] = {"execute": self.execute_cmd, "id": stage_id}
+            stage_box["metadata"] = {
+                "execute": self.execute_cmd,
+                "id": stage_id,
+                "axis_order_2d": "yx",
+                "axis_order_3d": "zyx",
+                "vector_layout": "split_components",
+            }
         else:
-            stage_box["metadata"] = {"id": stage_id}
+            stage_box["metadata"] = {
+                "id": stage_id,
+                "axis_order_2d": "yx",
+                "axis_order_3d": "zyx",
+                "vector_layout": "split_components",
+            }
+        stage_box = self._normalize_stage_for_h5(stage_box)
         write_b3d_h5(str(out_path), stage_box)
         if self.auto_visualize_last and stage_tag == self._last_stage_tag():
             self._open_last_viewer(stage_tag)
@@ -560,6 +694,14 @@ class GxBox(QMainWindow):
                             break
         elif os.path.basename(boxfile).endswith('.h5'):
             self.box.b3d = read_b3d_h5(boxfile)
+            axis_order = self.box.b3d.get("metadata", {}).get("axis_order_3d")
+            if axis_order == "zyx" and "corona" in self.box.b3d:
+                corona = dict(self.box.b3d["corona"])
+                for k in ("bx", "by", "bz"):
+                    if k in corona and np.asarray(corona[k]).ndim == 3:
+                        # Convert storage canonical (z,y,x) -> internal compute (x,y,z)
+                        corona[k] = np.asarray(corona[k]).transpose((2, 1, 0))
+                self.box.b3d["corona"] = corona
             if "corona" in self.box.b3d:
                 self.box.corona_type = self.box.b3d["corona"].get("attrs", {}).get("model_type")
                 if self.box.corona_type in ("pot", "nlfff"):
@@ -613,14 +755,15 @@ class GxBox(QMainWindow):
             return self.sdomaps[mapname]
 
         print(f'fov_coords: {fov_coords}')
-        loaded_map = Map(self.sdofitsfiles[mapname])
+        loaded_map = load_sunpy_map_compat(self.sdofitsfiles[mapname])
         fov_coords = self.corr_fov_coords(loaded_map, fov_coords)
         loaded_map = loaded_map.submap(fov_coords[0], top_right=fov_coords[1])
         # loaded_map = loaded_map.rotate(order=3)
         if mapname in ['azimuth']:
             if 'disambig' not in self.sdomaps.keys():
-                self.sdomaps['disambig'] = Map(self.sdofitsfiles['disambig']).submap(fov_coords[0],
-                                                                                     top_right=fov_coords[1])
+                self.sdomaps['disambig'] = load_sunpy_map_compat(self.sdofitsfiles['disambig']).submap(
+                    fov_coords[0], top_right=fov_coords[1]
+                )
             loaded_map = hmi_disambig(loaded_map, self.sdomaps['disambig'])
 
         self.sdomaps[mapname] = loaded_map
@@ -664,7 +807,7 @@ class GxBox(QMainWindow):
             return self.sdomaps[mapname]
 
         # Load general maps
-        loaded_map = Map(self.sdofitsfiles[mapname])
+        loaded_map = load_sunpy_map_compat(self.sdofitsfiles[mapname])
         fov_coords = self.corr_fov_coords(loaded_map, fov_coords)
         self.sdomaps[mapname] = loaded_map.submap(fov_coords[0], top_right=fov_coords[1])
         return self.sdomaps[mapname]
@@ -879,13 +1022,16 @@ class GxBox(QMainWindow):
             chromo_box[k] = lines[k]
         chromo_box["phys_length"] *= dr3[0]
         chromo_box["attrs"] = header
-        gen_chromo = self._make_gen_chromo(chromo_box)
-        self._save_stage("NAS.GEN", {"chromo": gen_chromo})
+        lines_group = self._make_lines_group(lines, np.array(dr3))
+        self._save_stage("NAS.GEN", {"corona": self.box.b3d["corona"], "lines": lines_group})
         if self.stop_after and self.stop_after.lower() == "gen":
             return
 
         self.box.b3d["chromo"] = chromo_box
-        self._save_stage("NAS.CHR", {"chromo": self.box.b3d["chromo"]})
+        self._save_stage(
+            "NAS.CHR",
+            {"corona": self.box.b3d["corona"], "lines": lines_group, "chromo": self._make_chromo_group(chromo_box)},
+        )
         print(f"Time taken to compute chromosphere model: {time.time() - t1:.1f} seconds")
 
     def calc_chromo_model(self):

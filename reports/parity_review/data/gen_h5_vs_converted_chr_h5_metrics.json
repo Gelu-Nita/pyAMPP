@@ -1,0 +1,48 @@
+{
+  "a": "/Users/gelu/Library/CloudStorage/Dropbox/@Projects/@SUNCAST-ORG/gximagecomputing/test_data/2025-11-26/hmi.M_720s.20251126_153431.W28S12CR.CEA.NAS.GEN.h5",
+  "b": "/private/tmp/test.chr.from_sav.h5",
+  "base_metrics": {
+    "bx": {
+      "shape_a": [
+        100,
+        150
+      ],
+      "shape_b": [
+        100,
+        150
+      ],
+      "mae": 30.2083824235138,
+      "rmse": 41.70712592269528,
+      "max_abs": 208.34119334590054,
+      "corr": 0.9657600520218387
+    },
+    "by": {
+      "shape_a": [
+        100,
+        150
+      ],
+      "shape_b": [
+        100,
+        150
+      ],
+      "mae": 26.53230147546491,
+      "rmse": 35.28018452250484,
+      "max_abs": 273.775357963202,
+      "corr": 0.974811359368652
+    },
+    "bz": {
+      "shape_a": [
+        100,
+        150
+      ],
+      "shape_b": [
+        100,
+        150
+      ],
+      "mae": 19.578410724689384,
+      "rmse": 27.40939683806158,
+      "max_abs": 208.20404875280246,
+      "corr": 0.9946693734622021
+    }
+  }
+}

@@ -79,16 +79,18 @@ def main(
     max_attr_len: int | None = typer.Option(120, "--attr-max", help="Max length for each attribute entry."),
     max_depth: int | None = typer.Option(None, "--max-depth", help="Limit recursion depth."),
     flt: Optional[str] = typer.Option(None, "--filter", help="Only show paths matching this string."),
-    show_metadata: bool = typer.Option(False, "--show-metadata", help="Print metadata/id and metadata/execute if present."),
+    no_metadata: bool = typer.Option(False, "--no-metadata", help="Do not print metadata/* values."),
+    meta_only: bool = typer.Option(False, "--meta", help="Print only metadata/* values (no tree)."),
 ) -> None:
     """Print a tree of groups/datasets with shapes and dtypes."""
     if path is None:
         print(ctx.get_help())
         raise typer.Exit(code=0)
     with h5py.File(path, "r") as h5f:
-        print(f"{path}")
-        _print_group(h5f, "", show_attrs, max_attr_len, max_depth, 0, flt, "")
-        if show_metadata and "metadata" in h5f:
+        if not meta_only:
+            print(f"{path}")
+            _print_group(h5f, "", show_attrs, max_attr_len, max_depth, 0, flt, "")
+        if (not no_metadata) and "metadata" in h5f:
             meta = h5f["metadata"]
             for key in meta.keys():
                 val = meta[key][()]

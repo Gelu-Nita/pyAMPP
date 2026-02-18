@@ -2,19 +2,27 @@ import sys
 import os
 import select
 import re
+import shlex
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QComboBox,
                              QRadioButton,
                              QCheckBox, QGridLayout, QGroupBox, QButtonGroup, QVBoxLayout, QHBoxLayout, QDateTimeEdit,
                              QCalendarWidget, QTextEdit, QMessageBox, QDockWidget, QToolButton, QMenu,
-                             QFileDialog)
+                             QFileDialog, QStyle)
 from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import QDateTime, Qt, QTimer
+from PyQt5.QtCore import QDateTime, Qt, QTimer, QSettings
+from datetime import datetime
 from PyQt5 import uic
 
 from pyampp.util.config import *
 import pyampp
 from pathlib import Path
 from pyampp.gxbox.boxutils import read_b3d_h5, validate_number
+from pyampp.gxbox.gx_fov2box import (
+    _load_entry_box_any,
+    _entry_stage_from_loaded,
+    _extract_execute_paths,
+)
+from pyampp.util.idl_execute_to_gxfov2box import _parse_idl_call, _build_gx_fov2box_command
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.time import Time
@@ -111,15 +119,55 @@ class PyAmppGUI(QMainWindow):
         self._proc_partial_line = ""
         self.info_only_box = None
         self._last_model_path = None
+        self._last_valid_entry_box = ""
+        self._entry_stage_detected = None
+        self._entry_type_detected = None
+        self._hydrating_entry = False
         self._proc_timer = QTimer(self)
         self._proc_timer.setInterval(500)
         self._proc_timer.timeout.connect(self._check_gxbox_process)
+        self._settings = QSettings("SUNCAST", "pyAMPP")
         self.model_time_orig = None
         # self.rotate_to_time_button = None
         self.rotate_revert_button = None
         self.coords_center = None
         self.coords_center_orig = None
         self.initUI()
+
+    def _has_entry_box(self) -> bool:
+        return bool(self.external_box_edit.text().strip())
+
+    def _stage_to_jump_action(self, stage: str) -> str:
+        s = (stage or "").upper()
+        return {
+            "NONE": "none",
+            "POT": "potential",
+            "BND": "bounds",
+            "NAS": "nlfff",
+            "GEN": "lines",
+            "CHR": "chromo",
+        }.get(s, "none")
+
+    def _set_model_params_enabled(self, enabled: bool) -> None:
+        widgets = [
+            self.model_time_edit,
+            self.coord_x_edit,
+            self.coord_y_edit,
+            self.hpc_radio_button,
+            self.hgc_radio_button,
+            self.hgs_radio_button,
+            self.proj_cea_radio,
+            self.proj_top_radio,
+            self.grid_x_edit,
+            self.grid_y_edit,
+            self.grid_z_edit,
+            self.res_edit,
+            self.padding_size_edit,
+            self.disambig_hmi_radio,
+            self.disambig_sfq_radio,
+        ]
+        for w in widgets:
+            w.setEnabled(enabled)
 
     def initUI(self):
         """
@@ -138,31 +186,79 @@ class PyAmppGUI(QMainWindow):
         self.add_status_log()
         self.update_coords_center()
 
+        self._sync_pipeline_options()
         self.update_command_display()
         self.show()
 
     def add_data_repository_section(self):
-        self.sdo_data_edit.setText(DOWNLOAD_DIR)
+        layout = self.data_repository_section.layout()
+        if layout is not None:
+            layout.setColumnStretch(0, 0)
+            layout.setColumnStretch(1, 1)
+            layout.setColumnStretch(2, 0)
+        self.sdo_data_edit.setText(self._settings.value("paths/data_dir", DOWNLOAD_DIR, type=str))
+        self.sdo_data_edit.setMinimumWidth(520)
         self.sdo_data_edit.returnPressed.connect(self.update_sdo_data_dir)
+        self.sdo_data_edit.textChanged.connect(self._persist_data_dir)
         self.sdo_browse_button.clicked.connect(self.open_sdo_file_dialog)
+        self.sdo_browse_button.setText("")
+        self.sdo_browse_button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
+        self.sdo_browse_button.setToolTip("Select SDO data repository")
+        self.sdo_browse_button.setFixedWidth(28)
 
-        self.gx_model_edit.setText(GXMODEL_DIR)
+        self.gx_model_edit.setText(self._settings.value("paths/gxmodel_dir", GXMODEL_DIR, type=str))
+        self.gx_model_edit.setMinimumWidth(520)
         self.gx_model_edit.returnPressed.connect(self.update_gxmodel_dir)
+        self.gx_model_edit.textChanged.connect(self._persist_gxmodel_dir)
         self.gx_browse_button.clicked.connect(self.open_gx_file_dialog)
+        self.gx_browse_button.setText("")
+        self.gx_browse_button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
+        self.gx_browse_button.setToolTip("Select GX model repository")
+        self.gx_browse_button.setFixedWidth(28)
 
         notify_email = os.environ.get("PYAMPP_JSOC_NOTIFY_EMAIL", JSOC_NOTIFY_EMAIL)
         self.jsoc_notify_email_edit.setText(notify_email)
         self.jsoc_notify_email_edit.returnPressed.connect(self.update_jsoc_notify_email)
 
+        self.external_box_edit.setMinimumWidth(520)
         self.external_box_edit.returnPressed.connect(self.update_external_box_dir)
         self.external_browse_button.clicked.connect(self.open_external_file_dialog)
+        self.external_browse_button.setText("")
+        self.external_browse_button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
+        self.external_browse_button.setToolTip("Select entry model file (.h5/.sav)")
+        self.external_browse_button.setFixedWidth(28)
+        self.entry_stage_label = QLabel("Detected Entry Type:")
+        self.entry_stage_edit = QLineEdit("N/A")
+        self.entry_stage_edit.setReadOnly(True)
+        self.entry_stage_edit.setFixedWidth(130)
+        self.entry_stage_edit.setToolTip("Detected entry type, e.g. POT.GEN.SAV or NAS.CHR.H5")
+        self.continue_radio = QRadioButton("Continue")
+        self.rebuild_none_radio = QRadioButton("Rebuild from NONE")
+        self.rebuild_obs_radio = QRadioButton("Rebuild from OBS")
+        self.continue_radio.setChecked(True)
+        self.continue_radio.toggled.connect(self._sync_pipeline_options)
+        self.rebuild_none_radio.toggled.connect(self._sync_pipeline_options)
+        self.rebuild_obs_radio.toggled.connect(self._sync_pipeline_options)
+        self.entry_mode_widget = QWidget()
+        mode_layout = QHBoxLayout(self.entry_mode_widget)
+        mode_layout.setContentsMargins(0, 0, 0, 0)
+        mode_layout.setSpacing(8)
+        mode_layout.addWidget(self.entry_stage_edit)
+        mode_layout.addWidget(self.continue_radio)
+        mode_layout.addWidget(self.rebuild_none_radio)
+        mode_layout.addWidget(self.rebuild_obs_radio)
+        mode_layout.addStretch()
+        if layout is not None:
+            layout.addWidget(self.entry_stage_label, 4, 0)
+            layout.addWidget(self.entry_mode_widget, 4, 1, 1, 2)
 
     def update_sdo_data_dir(self):
         """
         Updates the SDO data directory path based on the user input.
         """
         new_path = self.sdo_data_edit.text()
-        self.update_dir(new_path, DOWNLOAD_DIR)
+        self.update_dir(new_path, DOWNLOAD_DIR, self.sdo_data_edit)
+        self._persist_data_dir(self.sdo_data_edit.text())
         self.update_command_display()
 
     def update_gxmodel_dir(self):
@@ -170,8 +266,15 @@ class PyAmppGUI(QMainWindow):
         Updates the GX model directory path based on the user input.
         """
         new_path = self.gx_model_edit.text()
-        self.update_dir(new_path, GXMODEL_DIR)
+        self.update_dir(new_path, GXMODEL_DIR, self.gx_model_edit)
+        self._persist_gxmodel_dir(self.gx_model_edit.text())
         self.update_command_display()
+
+    def _persist_data_dir(self, text):
+        self._settings.setValue("paths/data_dir", (text or "").strip())
+
+    def _persist_gxmodel_dir(self, text):
+        self._settings.setValue("paths/gxmodel_dir", (text or "").strip())
 
     def update_jsoc_notify_email(self):
         """
@@ -188,59 +291,339 @@ class PyAmppGUI(QMainWindow):
         """
         Reads the external box path based on the user input.
         """
-        import pickle
-
         boxfile = self.external_box_edit.text()
-        if boxfile.endswith('.h5'):
-            boxdata = read_b3d_h5(boxfile)
-            corona = boxdata.get("corona")
-            if corona and "bx" in corona:
-                nx, ny, nz = corona["bx"].shape
-                self.grid_x_edit.setText(f'{nx}')
-                self.grid_y_edit.setText(f'{ny}')
-                self.grid_z_edit.setText(f'{nz}')
-            if corona and "dr" in corona:
-                dr0 = float(corona["dr"][0])
-                rsun_km = sun_consts.radius.to(u.km).value
-                self.res_edit.setText(f'{dr0 * rsun_km:.3f}')
-            self.update_command_display()
-            return
+        self._hydrating_entry = True
+        try:
+            boxdata = _load_entry_box_any(Path(boxfile))
+            entry_stage = _entry_stage_from_loaded(boxdata, Path(boxfile))
+            self._entry_stage_detected = entry_stage
+            entry_type = self._derive_entry_type(boxdata, Path(boxfile), entry_stage)
+            self._entry_type_detected = entry_type
+            self.entry_stage_edit.setText(entry_type)
 
-        with open(boxfile, 'rb') as f:
-            boxdata = pickle.load(f)
-            map_bottom = boxdata['map_bottom']
-            self.model_time_orig = map_bottom.date
-            if "corona" in boxdata.get("b3d", {}):
-                bx = boxdata['b3d']['corona']['bx']
-            else:
-                bx = boxdata['b3d']['nlfff']['bx']
-            nx, ny, nz = bx.shape
-            box_res = map_bottom.rsun_meters.to(u.Mm) * ((map_bottom.scale[0] * 1. * u.pix).to(u.rad) / u.rad)
-            center = map_bottom.center.transform_to(
-                HeliographicStonyhurst(obstime=self.model_time_orig))
-        self.model_time_edit.setDateTime(QDateTime(self.model_time_orig.to_datetime()))
-        self.hgs_radio_button.setChecked(True)
-        self.coord_x_edit.setText(f'{center.lon.to(u.deg).value}')
-        self.coord_y_edit.setText(f'{center.lat.to(u.deg).value}')
-        self.grid_x_edit.setText(f'{nx}')
-        self.grid_y_edit.setText(f'{ny}')
-        self.grid_z_edit.setText(f'{nz}')
-        self.res_edit.setText(f'{box_res.to(u.km).value}')
-        self.update_coords_center()
-        self.coords_center_orig = self.coords_center
+            execute_text = self._decode_meta_value(boxdata.get("metadata", {}).get("execute", ""))
+            self._apply_execute_defaults(execute_text, boxdata)
+            # Canonical time comes from entry model identity (id/path), not stale execute text.
+            # This guarantees "Rebuild from OBS" uses the uploaded model timestamp.
+            entry_dt = self._infer_entry_datetime(boxdata, Path(boxfile))
+            if entry_dt is not None:
+                self.model_time_edit.setDateTime(QDateTime(entry_dt))
+            exec_data_dir, exec_model_dir = _extract_execute_paths(execute_text)
+            warnings = []
+            if exec_data_dir:
+                p = Path(exec_data_dir).expanduser()
+                if p.exists():
+                    self.sdo_data_edit.setText(str(p))
+                else:
+                    self.sdo_data_edit.setText(DOWNLOAD_DIR)
+                    warnings.append(f"Invalid execute data-dir on this system, using default: {DOWNLOAD_DIR}")
+            if exec_model_dir:
+                p = Path(exec_model_dir).expanduser()
+                if p.exists():
+                    self.gx_model_edit.setText(str(p))
+                else:
+                    self.gx_model_edit.setText(GXMODEL_DIR)
+                    warnings.append(f"Invalid execute gxmodel-dir on this system, using default: {GXMODEL_DIR}")
+            self._persist_data_dir(self.sdo_data_edit.text())
+            self._persist_gxmodel_dir(self.gx_model_edit.text())
+
+            # Keep command state predictable when importing an entry box.
+            self._reset_pipeline_checks_for_entry()
+            self._set_jump_action("continue")
+            self._last_valid_entry_box = boxfile
+            if warnings:
+                QMessageBox.warning(self, "Entry Box Path Warnings", "\n".join(warnings))
+        finally:
+            self._hydrating_entry = False
+        self._set_model_params_enabled(False)
+        self._sync_pipeline_options()
         self.update_command_display()
+
+    def _derive_entry_type(self, boxdata: dict, entry_path: Path, entry_stage: str) -> str:
+        meta_id = self._decode_meta_value(boxdata.get("metadata", {}).get("id", "")).strip()
+        stage_path = entry_stage
+        if ".CEA." in meta_id:
+            stage_path = meta_id.split(".CEA.", 1)[1]
+        elif ".TOP." in meta_id:
+            stage_path = meta_id.split(".TOP.", 1)[1]
+        stage_path = self._infer_stage_path_from_content(boxdata, stage_path)
+        suffix = entry_path.suffix.lower()
+        file_tag = "SAV" if suffix == ".sav" else "H5"
+        return f"{stage_path}.{file_tag}".upper()
+
+    @staticmethod
+    def _infer_entry_datetime(boxdata: dict, entry_path: Path):
+        """
+        Infer observation datetime from metadata id or filename token YYYYMMDD_HHMMSS.
+        """
+        meta = boxdata.get("metadata", {}) if isinstance(boxdata, dict) else {}
+        meta_id = PyAmppGUI._decode_meta_value(meta.get("id", "")).strip()
+        candidates = [meta_id, entry_path.stem, entry_path.name]
+        for text in candidates:
+            m = re.search(r"(\d{8}_\d{6})", str(text))
+            if not m:
+                continue
+            try:
+                return datetime.strptime(m.group(1), "%Y%m%d_%H%M%S")
+            except Exception:
+                continue
+        return None
+
+    @staticmethod
+    def _has_lines_metadata(boxdata: dict) -> bool:
+        required = {"codes", "apex_idx", "start_idx", "end_idx", "seed_idx", "av_field", "phys_length", "voxel_status"}
+        lines = boxdata.get("lines")
+        if isinstance(lines, dict) and required.issubset(set(lines.keys())):
+            return True
+        # Backward compatibility: old files stored line arrays under chromo.
+        chromo = boxdata.get("chromo")
+        if isinstance(chromo, dict) and required.issubset(set(chromo.keys())):
+            return True
+        return False
+
+    def _infer_stage_path_from_content(self, boxdata: dict, stage_path_hint: str) -> str:
+        hint = (stage_path_hint or "").upper()
+        corona = boxdata.get("corona", {}) if isinstance(boxdata, dict) else {}
+        model_type = ""
+        if isinstance(corona, dict):
+            attrs = corona.get("attrs", {})
+            if isinstance(attrs, dict):
+                model_type = str(attrs.get("model_type", "")).strip().lower()
+        has_lines = self._has_lines_metadata(boxdata)
+        has_chromo = isinstance(boxdata.get("chromo"), dict)
+
+        # First derive POT/NAS branch from data, fallback to hint.
+        if model_type == "pot" or hint.startswith("POT"):
+            prefix = "POT"
+        elif model_type in ("nlfff", "nas") or hint.startswith("NAS"):
+            prefix = "NAS"
+        elif hint.startswith("BND") or model_type in ("bnd", "bounds"):
+            return "BND"
+        elif hint.startswith("NONE") or model_type == "none":
+            return "NONE"
+        else:
+            prefix = "NAS"
+
+        # Then derive stage detail from content (not ID text).
+        if has_chromo:
+            return f"{prefix}.GEN.CHR" if has_lines else f"{prefix}.CHR"
+        if has_lines:
+            return f"{prefix}.GEN"
+        if prefix == "POT":
+            return "POT"
+        return "NAS"
+
+    @staticmethod
+    def _decode_meta_value(v):
+        if isinstance(v, (bytes, bytearray)):
+            return v.decode("utf-8", errors="ignore")
+        if hasattr(v, "item"):
+            try:
+                vv = v.item()
+                if isinstance(vv, (bytes, bytearray)):
+                    return vv.decode("utf-8", errors="ignore")
+                return str(vv)
+            except Exception:
+                pass
+        return str(v or "")
+
+    def _apply_execute_defaults(self, execute_text: str, boxdata: dict):
+        """
+        Populate GUI fields from entry model metadata/execute.
+        """
+        parsed_cmd = []
+        text = (execute_text or "").strip()
+        if text:
+            # Native Python execute string stored in metadata.
+            if text.startswith("gx-fov2box") or " --" in text:
+                try:
+                    parsed_cmd = shlex.split(text)
+                except Exception:
+                    parsed_cmd = []
+            # IDL execute string fallback.
+            if not parsed_cmd:
+                try:
+                    _, kw = _parse_idl_call(text)
+                    parsed = _build_gx_fov2box_command(kw)
+                    parsed_cmd = parsed.command
+                except Exception:
+                    parsed_cmd = []
+
+        # Parse translated command tokens into a simple option map.
+        flag_arity = {
+            "--time": 1,
+            "--coords": 2,
+            "--box-dims": 3,
+            "--dx-km": 1,
+            "--pad-frac": 1,
+            "--data-dir": 1,
+            "--gxmodel-dir": 1,
+        }
+        opts = {}
+        i = 0
+        while i < len(parsed_cmd):
+            tok = parsed_cmd[i]
+            if tok in flag_arity:
+                n = flag_arity[tok]
+                vals = parsed_cmd[i + 1:i + 1 + n]
+                if len(vals) == n:
+                    opts[tok] = vals
+                i += 1 + n
+                continue
+            opts[tok] = True
+            i += 1
+
+        # Fallback extraction for robustness if parser misses.
+        if "--time" not in opts:
+            m = re.search(r"'(\d{1,2}-[A-Za-z]{3}-\d{2,4}\s+\d{2}:\d{2}:\d{2})'", text)
+            if m:
+                try:
+                    _, kw = _parse_idl_call(f"gx_fov2box, '{m.group(1)}'")
+                    parsed = _build_gx_fov2box_command(kw)
+                    if "--time" in parsed.command:
+                        ti = parsed.command.index("--time")
+                        if ti + 1 < len(parsed.command):
+                            opts["--time"] = [parsed.command[ti + 1]]
+                except Exception:
+                    pass
+        if "--coords" not in opts:
+            m = re.search(r"CENTER_ARCSEC\s*=\s*\[\s*([^\],]+)\s*,\s*([^\]]+)\s*\]", text, flags=re.IGNORECASE)
+            if m:
+                opts["--coords"] = [m.group(1).strip(), m.group(2).strip()]
+                opts["--hpc"] = True
+        if "--box-dims" not in opts:
+            m = re.search(r"SIZE_PIX\s*=\s*\[\s*([^\],]+)\s*,\s*([^\],]+)\s*,\s*([^\]]+)\s*\]", text, flags=re.IGNORECASE)
+            if m:
+                opts["--box-dims"] = [m.group(1).strip(), m.group(2).strip(), m.group(3).strip()]
+
+        # Time
+        if "--time" in opts:
+            try:
+                iso = str(opts["--time"][0]).strip()
+                dt = datetime.fromisoformat(iso)
+                self.model_time_edit.setDateTime(QDateTime(dt))
+            except Exception:
+                pass
+        # Frame first (without firing conversion handlers that could overwrite imported coords).
+        if "--hgc" in opts:
+            target_frame = "hgc"
+        elif "--hgs" in opts:
+            target_frame = "hgs"
+        else:
+            # default to HPC if execute didn't specify.
+            target_frame = "hpc"
+
+        for rb in (self.hpc_radio_button, self.hgc_radio_button, self.hgs_radio_button):
+            rb.blockSignals(True)
+        self.hpc_radio_button.setChecked(target_frame == "hpc")
+        self.hgc_radio_button.setChecked(target_frame == "hgc")
+        self.hgs_radio_button.setChecked(target_frame == "hgs")
+        for rb in (self.hpc_radio_button, self.hgc_radio_button, self.hgs_radio_button):
+            rb.blockSignals(False)
+
+        # Coordinates (apply after frame selection so imported values are not overwritten).
+        if "--coords" in opts:
+            try:
+                cx, cy = opts["--coords"]
+                self.coord_x_edit.setText(str(cx))
+                self.coord_y_edit.setText(str(cy))
+            except Exception:
+                pass
+
+        # Projection
+        if "--top" in opts:
+            self.proj_top_radio.setChecked(True)
+        else:
+            self.proj_cea_radio.setChecked(True)
+
+        # Box dimensions
+        if "--box-dims" in opts:
+            try:
+                nx, ny, nz = opts["--box-dims"]
+                self.grid_x_edit.setText(str(nx))
+                self.grid_y_edit.setText(str(ny))
+                self.grid_z_edit.setText(str(nz))
+            except Exception:
+                pass
+        else:
+            corona = boxdata.get("corona", {})
+            if isinstance(corona, dict) and "bx" in corona:
+                try:
+                    nz, ny, nx = corona["bx"].shape
+                    self.grid_x_edit.setText(str(nx))
+                    self.grid_y_edit.setText(str(ny))
+                    self.grid_z_edit.setText(str(nz))
+                except Exception:
+                    pass
+
+        # Resolution (dx_km)
+        if "--dx-km" in opts:
+            try:
+                self.res_edit.setText(f"{float(opts['--dx-km'][0]):.3f}")
+            except Exception:
+                pass
+        else:
+            corona = boxdata.get("corona", {})
+            if isinstance(corona, dict) and "dr" in corona:
+                try:
+                    dr0 = float(corona["dr"][0])
+                    rsun_km = sun_consts.radius.to(u.km).value
+                    self.res_edit.setText(f"{dr0 * rsun_km:.3f}")
+                except Exception:
+                    pass
+
+        # Padding fraction
+        if "--pad-frac" in opts:
+            try:
+                pad_frac = float(opts["--pad-frac"][0])
+                self.padding_size_edit.setText(f"{pad_frac * 100:.1f}")
+            except Exception:
+                pass
+
+        # Context map toggles
+        self.download_aia_euv.setChecked("--euv" in opts and "--no-euv" not in opts)
+        self.download_aia_uv.setChecked("--uv" in opts and "--no-uv" not in opts)
+
+        # Disambiguation
+        disambig = self._decode_meta_value(boxdata.get("metadata", {}).get("disambiguation", "")).strip().upper()
+        if "--sfq" in opts or disambig == "SFQ":
+            self.disambig_sfq_radio.setChecked(True)
+        else:
+            self.disambig_hmi_radio.setChecked(True)
 
     def update_external_box_dir(self):
         """
         Updates the external box directory path based on the user input.
         """
         new_path = self.external_box_edit.text()
-        self.update_dir(new_path, os.getcwd())
-        if os.path.isfile(self.external_box_edit.text()):
+        if not new_path.strip():
+            self._entry_stage_detected = None
+            self._entry_type_detected = None
+            self.entry_stage_edit.setText("N/A")
+            self._set_jump_action("continue")
+            self._set_model_params_enabled(True)
+            self._sync_pipeline_options()
+            self.update_command_display()
+            return
+        if not os.path.isfile(new_path):
+            QMessageBox.critical(self, "Invalid Entry Box", f"Path is not a file:\n{new_path}")
+            self._restore_last_valid_entry_box()
+            return
+        try:
             self.read_external_box()
+        except Exception as exc:
+            QMessageBox.critical(self, "Invalid Entry Box", f"Could not read entry box:\n{exc}")
+            self._restore_last_valid_entry_box()
+            return
         self.update_command_display()
 
-    def update_dir(self, new_path, default_path):
+    def _restore_last_valid_entry_box(self):
+        self.external_box_edit.blockSignals(True)
+        self.external_box_edit.setText(self._last_valid_entry_box)
+        self.external_box_edit.blockSignals(False)
+        self.update_command_display()
+
+    def update_dir(self, new_path, default_path, target_edit=None):
         """
         Updates the specified directory path.
 
@@ -271,7 +654,8 @@ class PyAmppGUI(QMainWindow):
                         QMessageBox.critical(self, "Error", f"Failed to create directory: {str(e)}")
                 else:
                     # User chose not to create the directory, revert to the original path
-                    self.sdo_data_edit.setText(DOWNLOAD_DIR)
+                    if target_edit is not None:
+                        target_edit.setText(default_path)
         # else:
         #     QMessageBox.warning(self, "Invalid Path", "The specified path is not a valid absolute path.")
 
@@ -281,9 +665,11 @@ class PyAmppGUI(QMainWindow):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        file_name = QFileDialog.getExistingDirectory(self, "Select Directory", DOWNLOAD_DIR)
+        start_dir = self.sdo_data_edit.text().strip() or DOWNLOAD_DIR
+        file_name = QFileDialog.getExistingDirectory(self, "Select Directory", start_dir)
         if file_name:
             self.sdo_data_edit.setText(file_name)
+            self.update_sdo_data_dir()
 
     def open_gx_file_dialog(self):
         """
@@ -291,9 +677,11 @@ class PyAmppGUI(QMainWindow):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        file_name = QFileDialog.getExistingDirectory(self, "Select Directory", GXMODEL_DIR)
+        start_dir = self.gx_model_edit.text().strip() or GXMODEL_DIR
+        file_name = QFileDialog.getExistingDirectory(self, "Select Directory", start_dir)
         if file_name:
             self.gx_model_edit.setText(file_name)
+            self.update_gxmodel_dir()
 
     def open_external_file_dialog(self):
         """
@@ -301,34 +689,16 @@ class PyAmppGUI(QMainWindow):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(self, "Select File", os.getcwd(), "Model Files (*.h5 *.gxbox)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Select File", os.getcwd(), "Model Files (*.h5 *.sav)")
         # file_name = QFileDialog.getExistingDirectory(self, "Select Directory", os.getcwd())
         if file_name:
             self.external_box_edit.setText(file_name)
-            self.read_external_box()
+            self.update_external_box_dir()
 
     def add_model_configuration_section(self):
-        # Replace combo with radio style jump controls (IDL-like UX).
+        # Hide legacy jump controls; workflow is linear with optional rebuild.
         self.jump_to_action_combo.setVisible(False)
-        self.label_jumpToAction.setText("Jump-to Action")
-        self.jump_none_radio = QRadioButton("none")
-        self.jump_potential_radio = QRadioButton("potential")
-        self.jump_nlfff_radio = QRadioButton("nlfff")
-        self.jump_lines_radio = QRadioButton("lines")
-        self.jump_chromo_radio = QRadioButton("chromo")
-        self.jump_none_radio.setChecked(True)
-        self.jump_button_group = QButtonGroup(self)
-        for rb in [
-            self.jump_none_radio,
-            self.jump_potential_radio,
-            self.jump_nlfff_radio,
-            self.jump_lines_radio,
-            self.jump_chromo_radio,
-        ]:
-            self.jump_button_group.addButton(rb)
-            insert_idx = max(0, self.jumpToActionLayout.count() - 1)
-            self.jumpToActionLayout.insertWidget(insert_idx, rb)
-            rb.toggled.connect(self._sync_pipeline_options)
+        self.label_jumpToAction.setVisible(False)
         self.model_time_edit.setDateTime(QDateTime.currentDateTimeUtc())
         self.model_time_edit.setDateTimeRange(QDateTime(2010, 1, 1, 0, 0, 0), QDateTime(QDateTime.currentDateTimeUtc()))
         self.model_time_edit.dateTimeChanged.connect(self.on_time_input_changed)
@@ -362,7 +732,6 @@ class PyAmppGUI(QMainWindow):
         proj_layout.addWidget(self.proj_top_radio)
         proj_layout.addStretch()
         self.proj_group.setLayout(proj_layout)
-        self.verticalLayout_2.addWidget(self.proj_group)
         self.proj_cea_radio.toggled.connect(self.update_command_display)
         self.proj_top_radio.toggled.connect(self.update_command_display)
 
@@ -379,40 +748,70 @@ class PyAmppGUI(QMainWindow):
         disambig_layout.addWidget(self.disambig_sfq_radio)
         disambig_layout.addStretch()
         self.disambig_group.setLayout(disambig_layout)
-        self.verticalLayout_2.addWidget(self.disambig_group)
         self.disambig_hmi_radio.toggled.connect(self.update_command_display)
         self.disambig_sfq_radio.toggled.connect(self.update_command_display)
 
+        # Keep projection and disambiguation on one row.
+        proj_disambig_row = QHBoxLayout()
+        proj_disambig_row.addWidget(self.proj_group)
+        proj_disambig_row.addWidget(self.disambig_group)
+        self.verticalLayout_2.addLayout(proj_disambig_row)
+
     def _get_jump_action(self):
-        if self.jump_potential_radio.isChecked():
-            return "potential"
-        if self.jump_nlfff_radio.isChecked():
-            return "nlfff"
-        if self.jump_lines_radio.isChecked():
-            return "lines"
-        if self.jump_chromo_radio.isChecked():
-            return "chromo"
-        return "none"
+        if self.rebuild_obs_radio.isChecked():
+            return "rebuild_obs"
+        if self.rebuild_none_radio.isChecked():
+            return "rebuild_none"
+        return "continue"
 
     def _set_jump_action(self, action):
-        target = (action or "none").lower()
-        mapping = {
-            "none": self.jump_none_radio,
-            "potential": self.jump_potential_radio,
-            "nlfff": self.jump_nlfff_radio,
-            "lines": self.jump_lines_radio,
-            "chromo": self.jump_chromo_radio,
-        }
-        rb = mapping.get(target, self.jump_none_radio)
-        rb.blockSignals(True)
-        rb.setChecked(True)
-        rb.blockSignals(False)
+        mode = (action or "continue").lower()
+        self.continue_radio.blockSignals(True)
+        self.rebuild_none_radio.blockSignals(True)
+        self.rebuild_obs_radio.blockSignals(True)
+        self.continue_radio.setChecked(mode == "continue")
+        self.rebuild_none_radio.setChecked(mode == "rebuild_none")
+        self.rebuild_obs_radio.setChecked(mode == "rebuild_obs")
+        self.continue_radio.blockSignals(False)
+        self.rebuild_none_radio.blockSignals(False)
+        self.rebuild_obs_radio.blockSignals(False)
+
+    def _reset_pipeline_checks_for_entry(self):
+        boxes = [
+            self.download_hmi_box,
+            self.download_aia_uv,
+            self.download_aia_euv,
+            self.stop_early_box,
+            self.save_empty_box,
+            self.save_potential_box,
+            self.save_bounds_box,
+            self.save_nas_box,
+            self.save_gen_box,
+            self.empty_box_only_box,
+            self.stop_after_bnd_box,
+            self.potential_only_box,
+            self.stop_after_potential_box,
+            self.nlfff_only_box,
+            self.generic_only_box,
+            self.add_save_chromo_box,
+            self.skip_nlfff_extrapolation,
+            self.skip_line_computation_box,
+            self.center_vox_box,
+        ]
+        for b in boxes:
+            b.blockSignals(True)
+            b.setChecked(False)
+            b.blockSignals(False)
 
     def add_options_section(self):
         """
         Adds the options section to the main layout.
         """
         self.optionsGroupBox.setTitle("Pipeline Workflow")
+        self.download_hmi_box = QCheckBox("Download HMI Vector Magnetograms")
+        self.download_hmi_box.setChecked(True)
+        self.download_hmi_box.setEnabled(False)
+        self.stop_early_box = QCheckBox("Stop")
         self.download_aia_euv.setChecked(True)
         self.download_aia_uv.setChecked(True)
         self.save_empty_box.setChecked(False)
@@ -422,13 +821,13 @@ class PyAmppGUI(QMainWindow):
         self.stop_after_potential_box.setChecked(False)
         self.stop_after_potential_box.setVisible(True)
         self.stop_after_potential_box.setEnabled(True)
-        self.stop_after_potential_box.setText("Stop after the potential box is generated")
-        self.skip_nlfff_extrapolation.setText("Skip NLFFF extrapolation")
-        self.download_aia_uv.setText("Download AIA/UV contextual maps")
-        self.download_aia_euv.setText("Download AIA/EUV contextual maps")
-        self.save_empty_box.setText("Save Empty Box")
-        self.save_potential_box.setText("Save Potential Box")
-        self.save_bounds_box.setText("Save Bounds Box")
+        self.stop_after_potential_box.setText("Stop after POT")
+        self.skip_nlfff_extrapolation.setText("Skip NLFFF stage")
+        self.download_aia_uv.setText("Download AIA/UV")
+        self.download_aia_euv.setText("Download AIA/EUV")
+        self.save_empty_box.setText("Save Empty Box (NONE)")
+        self.save_potential_box.setText("Save Potential Box (POT)")
+        self.save_bounds_box.setText("Save Bounds Box (BND)")
 
         # Additional CLI parity controls (added programmatically to preserve .ui compatibility)
         options_layout = self.optionsGroupBox.layout()
@@ -438,38 +837,48 @@ class PyAmppGUI(QMainWindow):
             if widget is not None:
                 widget.setParent(None)
 
-        self.save_nas_box = QCheckBox("Save NAS")
-        self.save_gen_box = QCheckBox("Save GEN")
-        self.save_chr_box = QCheckBox("Save CHR")
-        self.empty_box_only_box = QCheckBox("Empty Box Only")
+        self.save_nas_box = QCheckBox("Save NLFFF Box (NAS)")
+        self.save_gen_box = QCheckBox("Save Lines (GEN)")
+        self.empty_box_only_box = QCheckBox("Stop after NONE")
+        self.stop_after_bnd_box = QCheckBox("Stop after BND")
         self.potential_only_box = QCheckBox("Potential Only")
-        self.nlfff_only_box = QCheckBox("Stop after the NLFFF box is generated")
-        self.generic_only_box = QCheckBox("Do not add Fontenla chromosphere model")
-        self.center_vox_box = QCheckBox("Center voxel magnetic field line tracing")
+        self.nlfff_only_box = QCheckBox("Stop after NAS")
+        self.generic_only_box = QCheckBox("Stop after GEN")
+        self.skip_line_computation_box = QCheckBox("Skip Line Computation")
+        self.center_vox_box = QCheckBox("Center Box Tracing")
+        self.add_save_chromo_box = QCheckBox("Add and save Chromo Model (CHR)")
+        self.add_save_chromo_box.setChecked(True)
 
-        # Match legacy GX two-column workflow layout.
-        options_layout.addWidget(self.download_aia_uv, 0, 0)
-        options_layout.addWidget(self.download_aia_euv, 1, 0)
-        options_layout.addWidget(self.save_empty_box, 2, 0)
-        options_layout.addWidget(self.save_potential_box, 3, 0)
-        options_layout.addWidget(self.save_bounds_box, 4, 0)
-        options_layout.addWidget(self.stop_after_potential_box, 0, 1)
-        options_layout.addWidget(self.skip_nlfff_extrapolation, 1, 1)
-        options_layout.addWidget(self.nlfff_only_box, 2, 1)
-        options_layout.addWidget(self.center_vox_box, 3, 1)
-        options_layout.addWidget(self.generic_only_box, 4, 1)
+        # Stage-ordered two-column workflow layout.
+        # Two columns, 8 rows each, strict requested order (fill column 1 then column 2).
+        options_layout.addWidget(self.download_hmi_box, 0, 0)           # 1
+        options_layout.addWidget(self.download_aia_uv, 1, 0)            # 2
+        options_layout.addWidget(self.download_aia_euv, 2, 0)           # 3
+        options_layout.addWidget(self.stop_early_box, 3, 0)             # 4
+        options_layout.addWidget(self.save_empty_box, 4, 0)             # 5
+        options_layout.addWidget(self.empty_box_only_box, 5, 0)         # 6
+        options_layout.addWidget(self.save_potential_box, 6, 0)         # 7
+        options_layout.addWidget(self.save_bounds_box, 7, 0)            # 8
+        options_layout.addWidget(self.stop_after_potential_box, 0, 1)   # 9
+        options_layout.addWidget(self.skip_nlfff_extrapolation, 1, 1)   # 10
+        options_layout.addWidget(self.save_nas_box, 2, 1)               # 11
+        options_layout.addWidget(self.nlfff_only_box, 3, 1)             # 12
+        options_layout.addWidget(self.skip_line_computation_box, 4, 1)  # 13
+        options_layout.addWidget(self.save_gen_box, 5, 1)               # 14
+        options_layout.addWidget(self.generic_only_box, 6, 1)           # 15
+        options_layout.addWidget(self.add_save_chromo_box, 7, 1)        # 16
+        self.center_vox_box.setToolTip("Line tracing mode: Fast is default; enable for center-voxel tracing.")
+        self.center_vox_box.setVisible(False)
 
-        # Keep these available for CLI parity but out of this legacy-like workflow layout.
-        self.save_nas_box.setVisible(False)
-        self.save_gen_box.setVisible(False)
-        self.save_chr_box.setVisible(False)
-        self.empty_box_only_box.setVisible(False)
+        # Keep only for CLI backward compatibility.
         self.potential_only_box.setVisible(False)
 
         # Update command/state when options change
         dynamic_widgets = [
             self.download_aia_euv,
             self.download_aia_uv,
+            self.download_hmi_box,
+            self.stop_early_box,
             self.save_empty_box,
             self.save_potential_box,
             self.save_bounds_box,
@@ -477,10 +886,12 @@ class PyAmppGUI(QMainWindow):
             self.skip_nlfff_extrapolation,
             self.save_nas_box,
             self.save_gen_box,
-            self.save_chr_box,
+            self.empty_box_only_box,
+            self.stop_after_bnd_box,
             self.nlfff_only_box,
             self.generic_only_box,
-            self.center_vox_box,
+            self.skip_line_computation_box,
+            self.add_save_chromo_box,
         ]
         for w in dynamic_widgets:
             w.toggled.connect(self._sync_pipeline_options)
@@ -498,121 +909,146 @@ class PyAmppGUI(QMainWindow):
 
     def _sync_pipeline_options(self, *_):
         """
-        Enforce linear pipeline behavior:
-        - jump disables controls for preceding stages
-        - *only disables controls for following stages
-        - use-potential disables NAS-stage controls
+        Enforce linear stage workflow:
+        - from scratch (no entry): full pipeline options
+        - entry selected: forward-only from detected stage
+        - rebuild selected: restart from NONE using restored parameters
         """
-        jump_stage_map = {
-            "none": None,
-            "potential": 1,
-            "nlfff": 3,
-            "lines": 4,
-            "chromo": 5,
-        }
-        save_stage_boxes = [
-            (self.save_empty_box, 0),
-            (self.save_potential_box, 1),
-            (self.save_bounds_box, 2),
-            (self.save_nas_box, 3),
-            (self.save_gen_box, 4),
-            (self.save_chr_box, 5),
-        ]
-        only_stage_boxes = [
-            (self.stop_after_potential_box, 2),
-            (self.nlfff_only_box, 3),
-            (self.generic_only_box, 4),
-        ]
+        try:
+            stage_rank = {"NONE": 0, "POT": 1, "BND": 2, "NAS": 3, "GEN": 4, "CHR": 5}
+            save_stage_boxes = [
+                (self.save_empty_box, 0),
+                (self.save_potential_box, 1),
+                (self.save_bounds_box, 2),
+                (self.save_nas_box, 3),
+                (self.save_gen_box, 4),
+            ]
+            stop_stage_boxes = [
+                (self.stop_early_box, -1, None),
+                (self.empty_box_only_box, 0, self.save_empty_box),
+                (self.stop_after_potential_box, 1, self.save_potential_box),
+                (self.nlfff_only_box, 3, self.save_nas_box),
+                (self.generic_only_box, 4, self.save_gen_box),
+            ]
 
-        jump_action = self._get_jump_action()
-        jump_stage = jump_stage_map.get(jump_action)
+            has_entry = self._has_entry_box()
+            mode = self._get_jump_action()
+            rebuild_obs = mode == "rebuild_obs"
+            rebuild_none = mode == "rebuild_none"
+            start_stage = 0 if (not has_entry or rebuild_obs or rebuild_none) else stage_rank.get(self._entry_stage_detected or "NONE", 0)
 
-        # --use-potential means NAS stage is skipped.
-        if self.skip_nlfff_extrapolation.isChecked() and jump_action == "nlfff":
-            self._set_jump_action("lines")
-            jump_stage = 4
+            if not has_entry and mode != "continue":
+                self._set_jump_action("continue")
+                mode = "continue"
+                rebuild_obs = False
+                rebuild_none = False
+            self.rebuild_none_radio.setEnabled(has_entry)
+            self.rebuild_obs_radio.setEnabled(has_entry)
+            self._set_model_params_enabled((not has_entry) or rebuild_obs)
 
-        use_potential = self.skip_nlfff_extrapolation.isChecked()
+            # Strict no-going-back for map downloads when resuming from entry box.
+            if has_entry and not rebuild_obs:
+                for box in (self.download_hmi_box, self.download_aia_uv, self.download_aia_euv):
+                    box.blockSignals(True)
+                    box.setChecked(False)
+                    box.setEnabled(False)
+                    box.blockSignals(False)
+            else:
+                self.download_hmi_box.blockSignals(True)
+                self.download_hmi_box.setChecked(True)
+                self.download_hmi_box.setEnabled(False)
+                self.download_hmi_box.blockSignals(False)
+                self.download_aia_uv.setEnabled(True)
+                self.download_aia_euv.setEnabled(True)
 
-        # Disable NLFFF jump target when NAS is skipped.
-        self.jump_nlfff_radio.setEnabled(not use_potential)
+            # Keep stop controls mutually exclusive in stage order.
+            stop_stage = None
+            chosen_box = None
+            for box, stage, _save in stop_stage_boxes:
+                if box.isChecked():
+                    stop_stage = stage
+                    chosen_box = box
+                    break
+            if stop_stage is not None:
+                for box, _stage, _save in stop_stage_boxes:
+                    if box is not chosen_box and box.isChecked():
+                        box.blockSignals(True)
+                        box.setChecked(False)
+                        box.blockSignals(False)
 
-        def only_allowed(stage):
-            if jump_stage is not None and stage < jump_stage:
-                return False
-            if use_potential and stage == 3:
-                return False
-            return True
+            use_potential = self.skip_nlfff_extrapolation.isChecked()
+            skip_lines = self.skip_line_computation_box.isChecked()
+            # Allow skip-NLFFF from NONE/POT/BND starts.
+            if start_stage > 2:
+                self._set_checkbox_state(self.skip_nlfff_extrapolation, False)
+                use_potential = False
+            else:
+                # Skip-NLFFF is only meaningful if pipeline can proceed beyond POT.
+                skip_enabled = stop_stage is None or stop_stage >= 2
+                self._set_checkbox_state(self.skip_nlfff_extrapolation, skip_enabled)
+                use_potential = self.skip_nlfff_extrapolation.isChecked()
 
-        # Clear checked *only options that are no longer allowed.
-        for box, stage in only_stage_boxes:
-            if box.isChecked() and not only_allowed(stage):
-                box.blockSignals(True)
-                box.setChecked(False)
-                box.blockSignals(False)
+            skip_lines_enabled = start_stage <= 4 and (stop_stage is None or stop_stage >= 4)
+            self._set_checkbox_state(self.skip_line_computation_box, skip_lines_enabled)
+            skip_lines = self.skip_line_computation_box.isChecked()
 
-        stop_stage = None
-        for box, stage in only_stage_boxes:
-            if box.isChecked():
-                stop_stage = stage
-                break
+            for box, stage, _save in stop_stage_boxes:
+                enabled = (stage == -1 and start_stage == 0) or (stage >= start_stage)
+                if stop_stage is not None and stage > stop_stage:
+                    enabled = False
+                if use_potential and stage in (2, 3):
+                    enabled = False
+                if skip_lines and stage == 4:
+                    enabled = False
+                self._set_checkbox_state(box, enabled)
 
-        # --use-potential is irrelevant when stop is before NAS.
-        skip_enabled = stop_stage is None or stop_stage >= 3
-        self._set_checkbox_state(self.skip_nlfff_extrapolation, skip_enabled)
-        use_potential = self.skip_nlfff_extrapolation.isChecked()
+            for box, stage in save_stage_boxes:
+                enabled = stage >= start_stage
+                if stop_stage is not None and stage > stop_stage:
+                    enabled = False
+                if use_potential and stage in (2, 3):
+                    enabled = False
+                if skip_lines and stage == 4:
+                    enabled = False
+                # Requested behavior: when stopping after POT, POT save is default
+                # while Save BND stays available as an optional bonus.
+                if stop_stage == 1 and stage == 2:
+                    enabled = True
+                self._set_checkbox_state(box, enabled)
 
-        # Stops constrain allowable jump destinations too.
-        jump_option_stage = [
-            (self.jump_none_radio, None),
-            (self.jump_potential_radio, 1),
-            (self.jump_lines_radio, 4),
-            (self.jump_chromo_radio, 5),
-        ]
-        for rb, stage in jump_option_stage:
-            enabled = True
-            if stage is not None and stop_stage is not None and stage > stop_stage:
-                enabled = False
-            if stage == 3 and use_potential:
-                enabled = False
-            rb.setEnabled(enabled)
-        self.jump_nlfff_radio.setEnabled(not use_potential and not (stop_stage is not None and 3 > stop_stage))
+            # When a stop is selected, corresponding save is automatic.
+            if stop_stage is not None:
+                for _stop_box, stage, save_box in stop_stage_boxes:
+                    if stage == stop_stage and save_box is not None:
+                        save_box.blockSignals(True)
+                        save_box.setChecked(True)
+                        save_box.setEnabled(False)
+                        save_box.blockSignals(False)
+                        break
 
-        selected_jump = self._get_jump_action()
-        selected_stage = {"none": None, "potential": 1, "nlfff": 3, "lines": 4, "chromo": 5}.get(selected_jump)
-        invalid_selected = False
-        if selected_jump == "nlfff":
-            invalid_selected = use_potential or (stop_stage is not None and 3 > stop_stage)
-        elif selected_stage is not None:
-            invalid_selected = stop_stage is not None and selected_stage > stop_stage
-        if invalid_selected:
-            self._set_jump_action("none")
+            # CHR control is explicit and final-stage save is implicit.
+            chr_enabled = start_stage <= 5 and (stop_stage is None or stop_stage >= 4)
+            self._set_checkbox_state(self.add_save_chromo_box, chr_enabled)
+            if not chr_enabled:
+                self.add_save_chromo_box.blockSignals(True)
+                self.add_save_chromo_box.setChecked(False)
+                self.add_save_chromo_box.blockSignals(False)
+            elif not self.add_save_chromo_box.isChecked():
+                # keep unchecked by user; handled as stop-after-gen.
+                pass
 
-        for box, stage in only_stage_boxes:
-            enabled = only_allowed(stage)
-            if stop_stage is not None and stage > stop_stage:
-                enabled = False
-            self._set_checkbox_state(box, enabled)
-
-        for box, stage in save_stage_boxes:
-            enabled = True
-            if jump_stage is not None and stage < jump_stage:
-                enabled = False
-            if stop_stage is not None and stage > stop_stage:
-                enabled = False
-            if use_potential and stage == 3:
-                enabled = False
-            self._set_checkbox_state(box, enabled)
-
-        # center-vox matters only when lines are computed (stage >= NAS.GEN and not jumping directly to CHR).
-        center_vox_enabled = True
-        if stop_stage is not None and stop_stage < 4:
-            center_vox_enabled = False
-        if jump_stage == 5:
-            center_vox_enabled = False
-        self._set_checkbox_state(self.center_vox_box, center_vox_enabled)
-
-        self.update_command_display()
+            # center-vox matters only when lines are computed.
+            center_vox_enabled = True
+            if start_stage > 4:
+                center_vox_enabled = False
+            if stop_stage is not None and stop_stage < 4:
+                center_vox_enabled = False
+            if skip_lines:
+                center_vox_enabled = False
+            self._set_checkbox_state(self.center_vox_box, center_vox_enabled)
+            self.update_command_display()
+        except Exception as exc:
+            self.status_log_edit.append(f"GUI workflow sync error: {exc}")
 
     def add_cmd_display(self):
         """
@@ -799,18 +1235,14 @@ class PyAmppGUI(QMainWindow):
         """
         Updates the command display with the current command.
         """
-        # print(widget)
-        # if widget:
-        #     if isinstance(widget, QDateTimeEdit):
-        #         current_value = widget.dateTime().toString("yyyy-MM-dd HH:mm:ss")
-        #     else:
-        #         current_value = widget.text()
-        #     self.previous_params[widget] = self.current_params.get(widget, current_value)
-        #     self.current_params[widget] = current_value
-        self.coords_center = self._coords_center
-        command = self.get_command()
-        self.cmd_display_edit.clear()
-        self.cmd_display_edit.append(" ".join(command))
+        try:
+            if getattr(self, "_hydrating_entry", False):
+                return
+            self.coords_center = self._coords_center
+            command = self.get_command()
+            self.cmd_display_edit.setPlainText(" ".join(command))
+        except Exception as exc:
+            self.status_log_edit.append(f"GUI update error: {exc}")
 
     def update_hpc_state(self, checked, coords_center=None):
         """
@@ -916,30 +1348,41 @@ class PyAmppGUI(QMainWindow):
         import astropy.units as u
 
         command = ['gx-fov2box']
-        time = astropy.time.Time(self.model_time_edit.dateTime().toPyDateTime())
-        command += ['--time', time.to_datetime().strftime('%Y-%m-%dT%H:%M:%S')]
-        command += ['--coords', self.coord_x_edit.text(), self.coord_y_edit.text()]
-        if self.hpc_radio_button.isChecked():
-            command += ['--hpc']
-        elif self.hgc_radio_button.isChecked():
-            command += ['--hgc']
-        else:
-            command += ['--hgs']
-        if self.proj_top_radio.isChecked():
-            command += ['--top']
-        else:
-            command += ['--cea']
+        has_entry = self._has_entry_box()
+        jump_action = self._get_jump_action()
 
-        command += ['--box-dims', self.grid_x_edit.text(), self.grid_y_edit.text(), self.grid_z_edit.text()]
-        command += ['--dx-km', f'{float(self.res_edit.text()):.3f}']
-        command += ['--pad-frac', f'{float(self.padding_size_edit.text()) / 100:.2f}']
-        command += ['--data-dir', self.sdo_data_edit.text()]
-        command += ['--gxmodel-dir', self.gx_model_edit.text()]
-        if self.external_box_edit.text() != '':
+        # In entry continue/rebuild-none modes keep CLI minimal: entry-box + restored/selected paths + workflow flags.
+        if has_entry and jump_action != "rebuild_obs":
+            command += ['--data-dir', self.sdo_data_edit.text()]
+            command += ['--gxmodel-dir', self.gx_model_edit.text()]
             command += ['--entry-box', self.external_box_edit.text()]
+        else:
+            time = astropy.time.Time(self.model_time_edit.dateTime().toPyDateTime())
+            command += ['--time', time.to_datetime().strftime('%Y-%m-%dT%H:%M:%S')]
+            command += ['--coords', self.coord_x_edit.text(), self.coord_y_edit.text()]
+            if self.hpc_radio_button.isChecked():
+                command += ['--hpc']
+            elif self.hgc_radio_button.isChecked():
+                command += ['--hgc']
+            else:
+                command += ['--hgs']
+            if self.proj_top_radio.isChecked():
+                command += ['--top']
+            else:
+                command += ['--cea']
 
-        command += ['--euv' if self.download_aia_euv.isChecked() else '--no-euv']
-        command += ['--uv' if self.download_aia_uv.isChecked() else '--no-uv']
+            command += ['--box-dims', self.grid_x_edit.text(), self.grid_y_edit.text(), self.grid_z_edit.text()]
+            command += ['--dx-km', f'{float(self.res_edit.text()):.3f}']
+            command += ['--pad-frac', f'{float(self.padding_size_edit.text()) / 100:.2f}']
+            command += ['--data-dir', self.sdo_data_edit.text()]
+            command += ['--gxmodel-dir', self.gx_model_edit.text()]
+            if has_entry:
+                command += ['--entry-box', self.external_box_edit.text()]
+
+        if self.download_aia_euv.isChecked():
+            command += ['--euv']
+        if self.download_aia_uv.isChecked():
+            command += ['--uv']
 
         if self.save_empty_box.isChecked():
             command += ['--save-empty-box']
@@ -951,34 +1394,32 @@ class PyAmppGUI(QMainWindow):
             command += ['--save-nas']
         if self.save_gen_box.isChecked():
             command += ['--save-gen']
-        if self.save_chr_box.isChecked():
-            command += ['--save-chr']
 
-        if self.empty_box_only_box.isChecked():
-            command += ['--empty-box-only']
-        if self.stop_after_potential_box.isChecked():
-            command += ['--potential-only']
-        if self.nlfff_only_box.isChecked():
-            command += ['--nlfff-only']
-        if self.generic_only_box.isChecked():
-            command += ['--generic-only']
+        if self.stop_early_box.isChecked():
+            command += ['--stop-after', 'dl']
+        elif self.empty_box_only_box.isChecked():
+            command += ['--stop-after', 'none']
+        elif self.stop_after_potential_box.isChecked():
+            command += ['--stop-after', 'pot']
+        elif self.nlfff_only_box.isChecked():
+            command += ['--stop-after', 'nas']
+        elif self.generic_only_box.isChecked() or not self.add_save_chromo_box.isChecked():
+            command += ['--stop-after', 'gen']
 
         if self.skip_nlfff_extrapolation.isChecked():
             command += ['--use-potential']
+        if self.skip_line_computation_box.isChecked():
+            command += ['--skip-lines']
         if self.center_vox_box.isChecked():
             command += ['--center-vox']
 
-        jump_action = self._get_jump_action()
-        if jump_action == 'potential':
-            command += ['--jump2potential']
-        elif jump_action == 'nlfff':
-            command += ['--jump2nlfff']
-        elif jump_action == 'lines':
-            command += ['--jump2lines']
-        elif jump_action == 'chromo':
-            command += ['--jump2chromo']
+        if jump_action == 'rebuild_obs':
+            command += ['--rebuild']
+        elif jump_action == 'rebuild_none':
+            command += ['--rebuild-from-none']
 
-        if self.disambig_sfq_radio.isChecked():
+        # Disambiguation affects rebuild/new-box computation only.
+        if (not has_entry or jump_action == "rebuild_obs") and self.disambig_sfq_radio.isChecked():
             command += ['--sfq']
 
         if self.info_only_box is not None and self.info_only_box.isChecked():
@@ -1072,28 +1513,33 @@ class PyAmppGUI(QMainWindow):
             self._proc_timer.stop()
 
     def _check_gxbox_process(self):
-        if self._gxbox_proc is None:
-            self._proc_timer.stop()
-            return
+        try:
+            if self._gxbox_proc is None:
+                self._proc_timer.stop()
+                return
 
-        self._drain_process_output()
-        if self._gxbox_proc.poll() is None:
-            return
+            self._drain_process_output()
+            if self._gxbox_proc.poll() is None:
+                return
 
-        self._drain_process_output()
-        if self._proc_partial_line.strip():
-            self.status_log_edit.append(self._proc_partial_line)
-            self._proc_partial_line = ""
-        exit_code = self._gxbox_proc.returncode
-        if exit_code == 0:
-            self.status_log_edit.append("Command finished successfully")
-            self._update_last_model_path()
-        else:
-            self.status_log_edit.append(f"Command exited with code {exit_code}")
-        self._gxbox_proc = None
-        self.stop_button.setEnabled(False)
-        self.execute_button.setEnabled(True)
-        self._proc_timer.stop()
+            self._drain_process_output()
+            if self._proc_partial_line.strip():
+                self.status_log_edit.append(self._proc_partial_line)
+                self._proc_partial_line = ""
+            exit_code = self._gxbox_proc.returncode
+            if exit_code == 0:
+                self.status_log_edit.append("Command finished successfully")
+                self._update_last_model_path()
+            else:
+                self.status_log_edit.append(f"Command exited with code {exit_code}")
+        except Exception as exc:
+            self.status_log_edit.append(f"GUI process-monitor error: {exc}")
+        finally:
+            if self._gxbox_proc is not None and self._gxbox_proc.poll() is not None:
+                self._gxbox_proc = None
+                self.stop_button.setEnabled(False)
+                self.execute_button.setEnabled(True)
+                self._proc_timer.stop()
 
     def save_command(self):
         """
@@ -1223,7 +1669,7 @@ def main(
     --------
     .. code-block:: bash
 
-        gxampp
+        pyampp
     """
 
     app_qt = QApplication([])

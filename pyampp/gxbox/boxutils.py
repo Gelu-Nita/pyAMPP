@@ -387,6 +387,16 @@ def read_b3d_h5(filename):
         by_cor = b3dbox['corona']['by']
         bz_cor = b3dbox['corona']['bz']
     """
+    def _read_h5_node(node):
+        if isinstance(node, h5py.Group):
+            out = {}
+            for key in node.keys():
+                out[key] = _read_h5_node(node[key])
+            return out
+        if node.shape == ():
+            return node[()]
+        return node[:]
+
     box_b3d = {}
     with h5py.File(filename, 'r') as hdf_file:
         for model_type in hdf_file.keys():
@@ -403,22 +413,18 @@ def read_b3d_h5(filename):
                     model_attr = model_type
             if target_type not in box_b3d:
                 box_b3d[target_type] = {}
-            for component in group.keys():
+            component_names = list(group.keys())
+            if target_type == "refmaps":
+                def _refmap_sort_key(name: str):
+                    obj = group[name]
+                    if isinstance(obj, h5py.Group) and "order_index" in obj.attrs:
+                        return (0, int(obj.attrs["order_index"]))
+                    return (1, name)
+
+                component_names = sorted(component_names, key=_refmap_sort_key)
+            for component in component_names:
                 ds = group[component]
-                if isinstance(ds, h5py.Group):
-                    sub = {}
-                    for sub_key in ds.keys():
-                        sub_ds = ds[sub_key]
-                        if sub_ds.shape == ():
-                            sub[sub_key] = sub_ds[()]
-                        else:
-                            sub[sub_key] = sub_ds[:]
-                    box_b3d[target_type][component] = sub
-                else:
-                    if ds.shape == ():
-                        box_b3d[target_type][component] = ds[()]
-                    else:
-                        box_b3d[target_type][component] = ds[:]
+                box_b3d[target_type][component] = _read_h5_node(ds)
             if len(group.attrs.keys()) > 0 or model_attr is not None:
                 attrs = dict(group.attrs)
                 if model_attr is not None and "model_type" not in attrs:
@@ -467,12 +473,21 @@ def write_b3d_h5(filename, box_b3d):
             if target_type in hdf_file:
                 # Avoid collisions if multiple legacy groups map to corona
                 continue
-            group = hdf_file.create_group(target_type)
+            if target_type == "refmaps":
+                group = hdf_file.create_group(target_type, track_order=True)
+            else:
+                group = hdf_file.create_group(target_type)
+            refmap_idx = 0
             for component, data in components.items():
                 if component == "attrs":
                     continue
                 if isinstance(data, dict):
-                    sub = group.create_group(component)
+                    if target_type == "refmaps":
+                        sub = group.create_group(component, track_order=True)
+                        sub.attrs["order_index"] = np.int64(refmap_idx)
+                        refmap_idx += 1
+                    else:
+                        sub = group.create_group(component)
                     for sub_key, sub_val in data.items():
                         if target_type in ("chromo", "lines") and sub_key == "voxel_status":
                             sub.create_dataset(sub_key, data=np.asarray(sub_val, dtype=np.uint8))
