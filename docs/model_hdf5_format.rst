@@ -1,82 +1,139 @@
 pyAMPP HDF5 Model Format
 ========================
 
-This page describes the upgraded HDF5 stage files produced by ``gx-fov2box`` and consumed by downstream tools.
+This page documents the current stage-file contract written by ``gx-fov2box`` and consumed by:
 
-Common groups
--------------
+- ``gxbox-view`` (3D viewer),
+- ``gxrefmap-view`` (base/refmap browser),
+- resume/rebuild workflows via ``--entry-box``.
 
-All saved stages carry:
+File Naming
+-----------
 
-- ``base``:
-  - ``bx``, ``by``, ``bz`` (2D)
-  - ``ic`` (2D)
-  - ``chromo_mask`` (2D)
-  - ``index`` (FITS-like header string; canonical base-map header)
-- ``refmaps``:
-  - per map: ``refmaps/<map_id>/data`` and ``refmaps/<map_id>/wcs_header``
-- ``metadata``:
-  - ``id`` (stage id string)
-  - ``execute`` (full command provenance)
-  - ``disambiguation`` (e.g. HMI/SFQ)
-  - ``projection`` (CEA/TOP)
+Typical output naming pattern:
 
-Each refmap carries its own ``wcs_header`` by design, so maps can be reconstructed independently.
+- ``hmi.M_720s.YYYYMMDD_HHMMSS.<region>.CEA.NONE.h5``
+- same stem with stage suffixes ``POT``, ``BND``, ``NAS``, ``NAS.GEN``, ``NAS.CHR``
 
-Stage-specific groups
+Common Groups (All Stages)
+--------------------------
+
+``base``
+~~~~~~~~
+
+2D boundary maps:
+
+- ``base/bx``, ``base/by``, ``base/bz``
+- ``base/ic``
+- ``base/chromo_mask``
+- ``base/index`` (IDL-compatible serialized header payload)
+
+``metadata``
+~~~~~~~~~~~~
+
+Core provenance:
+
+- ``metadata/id``: model identifier
+- ``metadata/execute``: full command string used to create the model
+- ``metadata/projection``: ``CEA`` or ``TOP``
+- ``metadata/disambiguation``: e.g. ``HMI`` or ``SFQ``
+- ``metadata/axis_order_2d`` and ``metadata/axis_order_3d`` when present
+- ``metadata/vector_layout`` when present
+
+``refmaps``
+~~~~~~~~~~~
+
+Optional context maps, each in its own subgroup:
+
+- ``refmaps/<map_id>/data``
+- ``refmaps/<map_id>/wcs_header``
+
+``grid``
+~~~~~~~~
+
+Grid geometry and identity:
+
+- ``grid/dx``, ``grid/dy``, ``grid/dz``
+- ``grid/voxel_id`` (uint32)
+
+Stage-Specific Groups
 ---------------------
 
 NONE
 ~~~~
 
-- ``corona`` with zero-field placeholders and ``attrs/model_type = "none"``
-- ``grid`` with:
-  - ``voxel_id`` (uint32)
-  - ``dx``, ``dy``, ``dz``
-
-BND
-~~~
-
-- ``bounds`` group with boundary maps:
-  - ``bx``, ``by``, ``bz``, ``dr``
+- Minimal model shell for downstream continuation.
+- No solved extrapolation required.
+- ``corona`` may exist as placeholder fields with ``attrs/model_type = "none"``.
 
 POT
 ~~~
 
-- ``corona`` group with potential extrapolation:
-  - ``bx``, ``by``, ``bz``, ``dr``
-  - ``attrs/model_type = "pot"``
+Potential-field stage in ``corona``:
+
+- ``corona/bx``, ``corona/by``, ``corona/bz``
+- ``corona/dr``
+- ``corona/attrs/model_type = "pot"``
+- ``corona/corona_base`` when available
+
+BND
+~~~
+
+Boundary-conditioned stage in ``corona``:
+
+- ``corona/bx``, ``corona/by``, ``corona/bz``
+- ``corona/dr``
+- ``corona/corona_base`` when available
 
 NAS
 ~~~
 
-- ``corona`` group with NLFFF extrapolation:
-  - ``bx``, ``by``, ``bz``, ``dr``
-  - ``attrs/model_type = "nlfff"``
+NLFFF stage in ``corona``:
+
+- ``corona/bx``, ``corona/by``, ``corona/bz``
+- ``corona/dr``
+- ``corona/attrs/model_type = "nlfff"`` (or equivalent)
 
 NAS.GEN
 ~~~~~~~
 
-- ``chromo`` includes generated line metadata needed for CHR completion:
-  - ``codes``, ``apex_idx``, ``start_idx``, ``end_idx``, ``seed_idx``
-  - ``av_field``, ``phys_length``, ``voxel_status``
+Adds line-tracing products (stored in ``lines`` and/or stage-compatible chromo metadata):
+
+- line indexing arrays (start/end/apex/seed)
+- status/code arrays
+- aggregate line properties (average field, physical length)
 
 NAS.CHR
 ~~~~~~~
 
-- ``chromo`` full chromospheric model payload (e.g. ``bcube``, ``chromo_bcube``, ``chromo_*``, ``dz``, etc.)
-- ``grid`` with final:
-  - ``voxel_id`` (uint32)
-  - ``dx``, ``dy``, ``dz``
+Adds chromospheric payload in ``chromo`` and finalized grid metadata:
 
-Dimension conventions
+- chromospheric thermodynamic variables (where generated)
+- chromosphere-resolved field cubes (when present)
+- final ``grid/voxel_id`` and geometry values used by viewers/renderers
+
+Reference-map IDs
+-----------------
+
+Typical AIA-derived IDs used by viewers:
+
+- ``AIA_94``, ``AIA_131``, ``AIA_171``, ``AIA_193``, ``AIA_211``, ``AIA_304``, ``AIA_335``
+- ``AIA_1600``, ``AIA_1700`` (if UV requested)
+
+Axis and Layout Notes
 ---------------------
 
-- ``chromo/dz`` and ``grid/voxel_id`` use the same order: ``(nx, ny, nz)``.
-- Internal renderer arrays may be reordered for ABI compatibility; file-level convention remains ``(nx, ny, nz)``.
+- 2D base/refmap arrays are map-shaped with explicit WCS headers retained.
+- 3D field arrays are stored in the package-native HDF5 convention used by current writers/readers.
+- Viewers and adapters handle any required transpose/reindex for rendering and legacy compatibility.
 
-IDL compatibility notes
------------------------
+Resume/Entry Compatibility
+--------------------------
 
-- ``base/index`` is intended to be IDL-compatible metadata for base map geometry.
-- ``refmaps/*/wcs_header`` stores per-map WCS headers so IDL/Python viewers can reconstruct map coordinates.
+For robust resume behavior, entry files should include:
+
+- ``metadata/execute`` (for reproducible command provenance and path recovery),
+- valid ``metadata/id`` stage naming,
+- required stage groups for the selected jump/rebuild mode.
+
+When ``--entry-box`` is supplied, ``gx-fov2box`` detects stage availability and enforces required groups for continuation/rebuild paths.

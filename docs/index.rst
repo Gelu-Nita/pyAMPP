@@ -8,7 +8,9 @@ This is the documentation for pyAMPP.
    :caption: Contents:
 
    model_hdf5_format
+   gui_workflow
    viewers
+   changelog
 
 Indices and tables
 ==================
