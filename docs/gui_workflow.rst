@@ -54,7 +54,7 @@ Core inputs:
 Entry-Box Modes
 ---------------
 
-When ``Entry Box`` is provided, the GUI detects the stage/type and offers three execution modes:
+When ``Entry Box`` is provided, the GUI detects the stage/type and offers four execution modes:
 
 - ``Continue``:
   - continue from detected entry stage,
@@ -62,7 +62,12 @@ When ``Entry Box`` is provided, the GUI detects the stage/type and offers three 
 - ``Rebuild from NONE``:
   - keep entry as source metadata/context but restart stage computation from NONE (``--rebuild-from-none``).
 - ``Rebuild from OBS``:
-  - recompute from observed maps and current GUI model parameters (``--rebuild``).
+  - keep CLI entry-driven (``--entry-box ... --rebuild``),
+  - ``gx-fov2box`` restores entry timing/geometry internally.
+- ``Modify``:
+  - GUI-only helper mode (no dedicated CLI flag),
+  - unlock populated fields from the selected entry box,
+  - build a fresh command from current GUI fields (no ``--entry-box`` argument).
 
 Pipeline Options and Stage Stops
 --------------------------------
@@ -81,7 +86,13 @@ Stop rules:
 - ``NONE only`` -> ``--stop-after none``
 - ``POT only`` -> ``--stop-after pot``
 - ``NAS only`` -> ``--stop-after nas``
-- ``GEN only`` (or CHR disabled) -> ``--stop-after gen``
+- ``GEN only`` -> ``--stop-after gen``
+
+CHR behavior:
+
+- CHR save is intentionally not user-toggleable in the GUI.
+- If execution reaches CHR, the stage is saved automatically.
+- Selecting an earlier stop stage prevents CHR from running/saving.
 
 Other stage controls:
 

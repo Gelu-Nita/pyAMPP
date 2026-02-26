@@ -168,3 +168,17 @@ class Box:
     @property
     def all_edges(self):
         return self.bottom_edges + self.non_bottom_edges
+
+    @property
+    def box_view_up(self):
+        """
+        Return two nearby points in the observer frame that define the local +Y (screen up) direction.
+        gxbox_factory.box_view_up() converts these to Heliocentric and takes their vector difference.
+        """
+        origin_obs = self._origin.transform_to(self._frame_obs)
+        delta = 10 * u.arcsec
+        return SkyCoord(
+            Tx=[origin_obs.Tx, origin_obs.Tx],
+            Ty=[origin_obs.Ty - delta, origin_obs.Ty + delta],
+            frame=self._frame_obs,
+        )

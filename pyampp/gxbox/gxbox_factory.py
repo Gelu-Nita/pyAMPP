@@ -239,6 +239,70 @@ class GxBox(QMainWindow):
         self.map_bottom_im = None
         self._base_cache = None
         self._refmaps_cache = None
+        self._initialize_runtime(time, box_orig, box_dims, box_res, data_dir)
+
+    def _initialize_runtime(self, time, box_orig, box_dims, box_res, data_dir):
+        box_dimensions = box_dims / u.pix * box_res
+
+        # Dummy map placeholder; replaced by real maps from inputs.
+        self.instrument_map = self.make_dummy_map(self.box_origin.transform_to(self.frame_obs))
+
+        box_center = box_orig.transform_to(self.frame_hcc)
+        box_center = SkyCoord(
+            x=box_center.x,
+            y=box_center.y,
+            z=box_center.z + box_dimensions[2] / 2,
+            frame=box_center.frame,
+        )
+        # Center of the 3D box.
+        self.box_center = box_center
+
+        self.box = Box(self.frame_obs, self.box_origin, self.box_center, self.box_dims, self.box_res)
+        self.box_bounds = self.box.bounds_coords
+        self.bottom_wcs_header = self.box.bottom_cea_header
+
+        self.fov_coords = self.box.bounds_coords_bl_tr(pad_frac=self.pad_frac)
+        if not all([coordinate_is_on_solar_disk(coord) for coord in self.fov_coords]):
+            print("Warning: Some of the box corners are not on the solar disk. Please check the box dimensions.")
+
+        if self.hmifiles:
+            data_dir = self.hmifiles
+        download_sdo = downloader.SDOImageDownloader(time, data_dir=data_dir, euv=self.euv, uv=self.uv)
+        self.sdofitsfiles = download_sdo.download_images()
+        self.sdomaps = {}
+
+        self.sdomaps[self.init_map_context_name] = self.loadmap(self.init_map_context_name)
+        self.map_context = self.sdomaps[self.init_map_context_name]
+        self.bottom_wcs_header['rsun_ref'] = self.map_context.meta['rsun_ref']
+        self.sdomaps[self.init_map_bottom_name] = self.loadmap(self.init_map_bottom_name)
+        self.map_bottom = self.sdomaps[self.init_map_bottom_name].reproject_to(
+            self.bottom_wcs_header,
+            algorithm="adaptive",
+            roundtrip_coords=False,
+        )
+
+        if self.save_empty_box:
+            self._save_empty_box()
+        if self.save_bounds:
+            self._save_bounds()
+
+        self.init_ui()
+
+        if self.entry_box:
+            if os.path.isfile(self.entry_box):
+                self.load_gxbox(self.entry_box)
+            if self.jump2potential:
+                self.stop_after = "pot"
+                self.calc_potential_field()
+            elif self.jump2nlfff:
+                self.stop_after = "nas"
+                self.calc_nlfff()
+            elif self.jump2lines:
+                self.stop_after = "gen"
+                self.calc_nlfff()
+            elif self.jump2chromo:
+                self.stop_after = "chr"
+                self.calc_nlfff()
 
     def _stage_output_dir(self) -> Path:
         date_str = self.time.to_datetime().strftime("%Y-%m-%d")
@@ -595,68 +659,6 @@ class GxBox(QMainWindow):
         if self.auto_visualize_last and stage_tag == self._last_stage_tag():
             self._open_last_viewer(stage_tag)
         self.pot_res = None
-
-        box_dimensions = box_dims / u.pix * box_res
-
-        ## this is a dummy map. it should be replaced by a real map from inputs.
-        self.instrument_map = self.make_dummy_map(self.box_origin.transform_to(self.frame_obs))
-
-        box_center = box_orig.transform_to(self.frame_hcc)
-        box_center = SkyCoord(x=box_center.x,
-                              y=box_center.y,
-                              z=box_center.z + box_dimensions[2] / 2,
-                              frame=box_center.frame)
-        ## this is the center of the box
-        self.box_center = box_center
-
-        self.box = Box(self.frame_obs, self.box_origin, self.box_center, self.box_dims, self.box_res)
-        self.box_bounds = self.box.bounds_coords
-        self.bottom_wcs_header = self.box.bottom_cea_header
-
-        self.fov_coords = self.box.bounds_coords_bl_tr(pad_frac=self.pad_frac)
-        # print(f"Bottom left: {self.fov_coords[0]}; Top right: {self.fov_coords[1]}")
-
-        if not all([coordinate_is_on_solar_disk(coord) for coord in self.fov_coords]):
-            print("Warning: Some of the box corners are not on the solar disk. Please check the box dimensions.")
-
-        if self.hmifiles:
-            data_dir = self.hmifiles
-        download_sdo = downloader.SDOImageDownloader(time, data_dir=data_dir, euv=self.euv, uv=self.uv)
-        self.sdofitsfiles = download_sdo.download_images()
-        self.sdomaps = {}
-
-        self.sdomaps[self.init_map_context_name] = self.loadmap(self.init_map_context_name)
-        self.map_context = self.sdomaps[self.init_map_context_name]
-        self.bottom_wcs_header['rsun_ref'] = self.map_context.meta['rsun_ref']
-        self.sdomaps[self.init_map_bottom_name] = self.loadmap(self.init_map_bottom_name)
-
-        # print(self.bottom_wcs_header)
-        self.map_bottom = self.sdomaps[self.init_map_bottom_name].reproject_to(self.bottom_wcs_header,
-                                                                               algorithm="adaptive",
-                                                                               roundtrip_coords=False)
-
-        if self.save_empty_box:
-            self._save_empty_box()
-        if self.save_bounds:
-            self._save_bounds()
-
-        self.init_ui()
-
-        if self.entry_box:
-            if os.path.isfile(self.entry_box):
-                self.load_gxbox(self.entry_box)
-            if self.jump2potential:
-                self.stop_after = "pot"
-                self.calc_potential_field()
-            elif self.jump2nlfff:
-                self.stop_after = "nas"
-                self.calc_nlfff()
-            elif self.jump2lines:
-                self.stop_after = "gen"
-                self.calc_nlfff()
-            elif self.jump2chromo:
-                self.stop_after = "chr"
-                self.calc_nlfff()
 
     def box_norm_direction(self):
         cartesian_coords = self.box_origin.transform_to(

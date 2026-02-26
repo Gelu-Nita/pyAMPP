@@ -235,10 +235,12 @@ class PyAmppGUI(QMainWindow):
         self.continue_radio = QRadioButton("Continue")
         self.rebuild_none_radio = QRadioButton("Rebuild from NONE")
         self.rebuild_obs_radio = QRadioButton("Rebuild from OBS")
+        self.modify_radio = QRadioButton("Modify")
         self.continue_radio.setChecked(True)
         self.continue_radio.toggled.connect(self._sync_pipeline_options)
         self.rebuild_none_radio.toggled.connect(self._sync_pipeline_options)
         self.rebuild_obs_radio.toggled.connect(self._sync_pipeline_options)
+        self.modify_radio.toggled.connect(self._sync_pipeline_options)
         self.entry_mode_widget = QWidget()
         mode_layout = QHBoxLayout(self.entry_mode_widget)
         mode_layout.setContentsMargins(0, 0, 0, 0)
@@ -247,6 +249,7 @@ class PyAmppGUI(QMainWindow):
         mode_layout.addWidget(self.continue_radio)
         mode_layout.addWidget(self.rebuild_none_radio)
         mode_layout.addWidget(self.rebuild_obs_radio)
+        mode_layout.addWidget(self.modify_radio)
         mode_layout.addStretch()
         if layout is not None:
             layout.addWidget(self.entry_stage_label, 4, 0)
@@ -758,6 +761,8 @@ class PyAmppGUI(QMainWindow):
         self.verticalLayout_2.addLayout(proj_disambig_row)
 
     def _get_jump_action(self):
+        if self.modify_radio.isChecked():
+            return "modify"
         if self.rebuild_obs_radio.isChecked():
             return "rebuild_obs"
         if self.rebuild_none_radio.isChecked():
@@ -769,12 +774,15 @@ class PyAmppGUI(QMainWindow):
         self.continue_radio.blockSignals(True)
         self.rebuild_none_radio.blockSignals(True)
         self.rebuild_obs_radio.blockSignals(True)
+        self.modify_radio.blockSignals(True)
         self.continue_radio.setChecked(mode == "continue")
         self.rebuild_none_radio.setChecked(mode == "rebuild_none")
         self.rebuild_obs_radio.setChecked(mode == "rebuild_obs")
+        self.modify_radio.setChecked(mode == "modify")
         self.continue_radio.blockSignals(False)
         self.rebuild_none_radio.blockSignals(False)
         self.rebuild_obs_radio.blockSignals(False)
+        self.modify_radio.blockSignals(False)
 
     def _reset_pipeline_checks_for_entry(self):
         boxes = [
@@ -912,7 +920,8 @@ class PyAmppGUI(QMainWindow):
         Enforce linear stage workflow:
         - from scratch (no entry): full pipeline options
         - entry selected: forward-only from detected stage
-        - rebuild selected: restart from NONE using restored parameters
+        - rebuild selected: restart from NONE/OBS using restored entry parameters
+        - modify selected: unlock parameters and build a fresh script
         """
         try:
             stage_rank = {"NONE": 0, "POT": 1, "BND": 2, "NAS": 3, "GEN": 4, "CHR": 5}
@@ -933,21 +942,24 @@ class PyAmppGUI(QMainWindow):
 
             has_entry = self._has_entry_box()
             mode = self._get_jump_action()
+            modify_mode = mode == "modify"
             rebuild_obs = mode == "rebuild_obs"
             rebuild_none = mode == "rebuild_none"
-            start_stage = 0 if (not has_entry or rebuild_obs or rebuild_none) else stage_rank.get(self._entry_stage_detected or "NONE", 0)
+            start_stage = 0 if (not has_entry or rebuild_obs or rebuild_none or modify_mode) else stage_rank.get(self._entry_stage_detected or "NONE", 0)
 
             if not has_entry and mode != "continue":
                 self._set_jump_action("continue")
                 mode = "continue"
+                modify_mode = False
                 rebuild_obs = False
                 rebuild_none = False
             self.rebuild_none_radio.setEnabled(has_entry)
             self.rebuild_obs_radio.setEnabled(has_entry)
-            self._set_model_params_enabled((not has_entry) or rebuild_obs)
+            self.modify_radio.setEnabled(has_entry)
+            self._set_model_params_enabled((not has_entry) or modify_mode)
 
             # Strict no-going-back for map downloads when resuming from entry box.
-            if has_entry and not rebuild_obs:
+            if has_entry and not modify_mode:
                 for box in (self.download_hmi_box, self.download_aia_uv, self.download_aia_euv):
                     box.blockSignals(True)
                     box.setChecked(False)
@@ -1026,16 +1038,12 @@ class PyAmppGUI(QMainWindow):
                         save_box.blockSignals(False)
                         break
 
-            # CHR control is explicit and final-stage save is implicit.
-            chr_enabled = start_stage <= 5 and (stop_stage is None or stop_stage >= 4)
-            self._set_checkbox_state(self.add_save_chromo_box, chr_enabled)
-            if not chr_enabled:
-                self.add_save_chromo_box.blockSignals(True)
-                self.add_save_chromo_box.setChecked(False)
-                self.add_save_chromo_box.blockSignals(False)
-            elif not self.add_save_chromo_box.isChecked():
-                # keep unchecked by user; handled as stop-after-gen.
-                pass
+            # CHR save is automatic when pipeline is not stopped earlier.
+            # Keep it disabled in all cases; uncheck only when a stop is selected.
+            self.add_save_chromo_box.blockSignals(True)
+            self.add_save_chromo_box.setChecked(stop_stage is None)
+            self.add_save_chromo_box.setEnabled(False)
+            self.add_save_chromo_box.blockSignals(False)
 
             # center-vox matters only when lines are computed.
             center_vox_enabled = True
@@ -1351,8 +1359,8 @@ class PyAmppGUI(QMainWindow):
         has_entry = self._has_entry_box()
         jump_action = self._get_jump_action()
 
-        # In entry continue/rebuild-none modes keep CLI minimal: entry-box + restored/selected paths + workflow flags.
-        if has_entry and jump_action != "rebuild_obs":
+        # Entry-based modes keep CLI minimal; modify mode builds a fresh script from GUI fields.
+        if has_entry and jump_action != "modify":
             command += ['--data-dir', self.sdo_data_edit.text()]
             command += ['--gxmodel-dir', self.gx_model_edit.text()]
             command += ['--entry-box', self.external_box_edit.text()]
@@ -1376,8 +1384,6 @@ class PyAmppGUI(QMainWindow):
             command += ['--pad-frac', f'{float(self.padding_size_edit.text()) / 100:.2f}']
             command += ['--data-dir', self.sdo_data_edit.text()]
             command += ['--gxmodel-dir', self.gx_model_edit.text()]
-            if has_entry:
-                command += ['--entry-box', self.external_box_edit.text()]
 
         if self.download_aia_euv.isChecked():
             command += ['--euv']
@@ -1418,8 +1424,8 @@ class PyAmppGUI(QMainWindow):
         elif jump_action == 'rebuild_none':
             command += ['--rebuild-from-none']
 
-        # Disambiguation affects rebuild/new-box computation only.
-        if (not has_entry or jump_action == "rebuild_obs") and self.disambig_sfq_radio.isChecked():
+        # Disambiguation affects fresh scripts (new or modify mode) only.
+        if ((not has_entry) or jump_action == "modify") and self.disambig_sfq_radio.isChecked():
             command += ['--sfq']
 
         if self.info_only_box is not None and self.info_only_box.isChecked():
