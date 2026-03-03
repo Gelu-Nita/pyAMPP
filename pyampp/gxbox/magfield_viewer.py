@@ -247,12 +247,9 @@ class MagFieldViewer(BackgroundPlotter):
         """
         Set the camera to the observer line-of-sight.
 
-        The camera basis itself stays in the fixed observer HCC convention:
-        +X to screen-right, +Y to screen-up, and +Z toward the observer. The
-        viewer operates in the box-local frame, so convert the fixed observer
-        view vectors into the true local box basis before positioning the
-        camera. This keeps the slicer, model box, and observer-aligned FOV box
-        mutually consistent in LoS parallel projection.
+        The authoritative orientation comes only from the observer WCS and the
+        box frame. The optional FOV box is used only to choose the framing
+        target (center/zoom), never to define the camera basis itself.
         """
 
         def normalize(v):
@@ -263,48 +260,6 @@ class MagFieldViewer(BackgroundPlotter):
             if not np.isfinite(norm) or norm <= 0:
                 return None
             return arr / norm
-
-        def orthonormalize(x_vec, y_vec):
-            x_hat = normalize(x_vec)
-            if x_hat is None:
-                return None, None, None
-            y_proj = np.asarray(y_vec, dtype=float) - np.dot(np.asarray(y_vec, dtype=float), x_hat) * x_hat
-            y_hat = normalize(y_proj)
-            if y_hat is None:
-                return None, None, None
-            z_hat = normalize(np.cross(x_hat, y_hat))
-            if z_hat is None:
-                return None, None, None
-            y_hat = normalize(np.cross(z_hat, x_hat))
-            if y_hat is None:
-                return None, None, None
-            return x_hat, y_hat, z_hat
-
-        # Prefer the observer-aligned FOV-box basis when available. In LoS
-        # parallel projection this box should collapse to a screen-aligned
-        # rectangle by definition.
-        fov_corners = self._fov_box_corners_local()
-        if isinstance(fov_corners, np.ndarray) and fov_corners.shape == (8, 3):
-            right_local, up_local, toward_observer_local = orthonormalize(
-                fov_corners[1] - fov_corners[0],
-                fov_corners[2] - fov_corners[0],
-            )
-            if right_local is not None and up_local is not None and toward_observer_local is not None:
-                view_local = -toward_observer_local  # observer -> Sun
-                focal_point = np.mean(fov_corners, axis=0).tolist()
-                self.camera.up = [float(up_local[0]), float(up_local[1]), float(up_local[2])]
-                self.camera.focal_point = focal_point
-                self.camera.position = [
-                    float(focal_point[0] - view_local[0]),
-                    float(focal_point[1] - view_local[1]),
-                    float(focal_point[2] - view_local[2]),
-                ]
-                self.camera.ParallelProjectionOn()
-                self.reset_camera()
-                self.camera.zoom(1.15)
-                if self.parallel_proj_button is not None:
-                    self.parallel_proj_button.setChecked(True)
-                return
 
         box_frame = getattr(getattr(self.box, "_center", None), "frame", None)
         observer = None
@@ -320,86 +275,193 @@ class MagFieldViewer(BackgroundPlotter):
         if box_frame is None or observer is None:
             return
 
-        frame_hcc = Heliocentric(observer=observer, obstime=obstime)
         center = getattr(self.box, "_center", None)
         if center is None:
             return
-        step = 1.0 * u.Mm
-        try:
-            x_ref = SkyCoord(x=center.x + step, y=center.y, z=center.z, frame=box_frame).transform_to(frame_hcc)
-            y_ref = SkyCoord(x=center.x, y=center.y + step, z=center.z, frame=box_frame).transform_to(frame_hcc)
-            z_ref = SkyCoord(x=center.x, y=center.y, z=center.z + step, frame=box_frame).transform_to(frame_hcc)
-            c_ref = center.transform_to(frame_hcc)
-        except Exception:
+        frame_obs = getattr(self.box, "_frame_obs", None)
+        if frame_obs is None:
             return
-
-        def delta_xyz(ref):
-            try:
-                return np.array(
+        step_arcsec = 10.0 * u.arcsec
+        step_mm = 1.0 * u.Mm
+        try:
+            # Use the observer WCS itself (same sky plane used by the 2D view)
+            # as the authoritative LOS basis.
+            fov_corners = self._fov_box_corners_local()
+            if isinstance(fov_corners, np.ndarray) and fov_corners.shape == (8, 3):
+                focal_point_arr = np.mean(fov_corners, axis=0)
+                ref_local = SkyCoord(
+                    x=focal_point_arr[0] * u.Mm,
+                    y=focal_point_arr[1] * u.Mm,
+                    z=(focal_point_arr[2] + float(self.grid_zbase)) * u.Mm,
+                    frame=box_frame,
+                )
+            else:
+                focal_point_arr = np.asarray(
                     [
-                        float(ref.x.to_value(u.Mm) - c_ref.x.to_value(u.Mm)),
-                        float(ref.y.to_value(u.Mm) - c_ref.y.to_value(u.Mm)),
-                        float(ref.z.to_value(u.Mm) - c_ref.z.to_value(u.Mm)),
+                        0.5 * (self.grid_xmin + self.grid_xmax),
+                        0.5 * (self.grid_ymin + self.grid_ymax),
+                        0.5 * (self.grid_zmin + self.grid_zmax),
+                    ],
+                    dtype=float,
+                )
+                ref_local = center
+
+            ref_obs = ref_local.transform_to(frame_obs)
+            ref_dist = getattr(ref_obs, "distance", None)
+            if ref_dist is None:
+                return
+            right_ref_obs = SkyCoord(
+                Tx=ref_obs.Tx + step_arcsec,
+                Ty=ref_obs.Ty,
+                distance=ref_dist,
+                frame=frame_obs,
+            )
+            up_ref_obs = SkyCoord(
+                Tx=ref_obs.Tx,
+                Ty=ref_obs.Ty + step_arcsec,
+                distance=ref_dist,
+                frame=frame_obs,
+            )
+            toward_ref_obs = SkyCoord(
+                Tx=ref_obs.Tx,
+                Ty=ref_obs.Ty,
+                distance=ref_dist - step_mm,
+                frame=frame_obs,
+            )
+
+            right_ref_local = right_ref_obs.transform_to(box_frame)
+            up_ref_local = up_ref_obs.transform_to(box_frame)
+            toward_ref_local = toward_ref_obs.transform_to(box_frame)
+        except Exception:
+            # Fallback to a best-effort HCC-based approximation if the WCS path fails.
+            frame_hcc = Heliocentric(observer=observer, obstime=obstime)
+            step = 1.0 * u.Mm
+            try:
+                center_hcc = center.transform_to(frame_hcc)
+                right_ref_local = SkyCoord(
+                    x=center_hcc.x + step,
+                    y=center_hcc.y,
+                    z=center_hcc.z,
+                    frame=frame_hcc,
+                ).transform_to(box_frame)
+                up_ref_local = SkyCoord(
+                    x=center_hcc.x,
+                    y=center_hcc.y + step,
+                    z=center_hcc.z,
+                    frame=frame_hcc,
+                ).transform_to(box_frame)
+                toward_ref_local = SkyCoord(
+                    x=center_hcc.x,
+                    y=center_hcc.y,
+                    z=center_hcc.z + step,
+                    frame=frame_hcc,
+                ).transform_to(box_frame)
+                focal_point_arr = np.asarray(
+                    [
+                        0.5 * (self.grid_xmin + self.grid_xmax),
+                        0.5 * (self.grid_ymin + self.grid_ymax),
+                        0.5 * (self.grid_zmin + self.grid_zmax),
                     ],
                     dtype=float,
                 )
             except Exception:
-                return None
-
-        box_x_hcc = normalize(delta_xyz(x_ref))
-        box_y_hcc = normalize(delta_xyz(y_ref))
-        box_z_hcc = normalize(delta_xyz(z_ref))
-        if box_x_hcc is None or box_y_hcc is None or box_z_hcc is None:
-            # Fallback to the legacy approximation if the explicit basis fails.
-            box_z_hcc = normalize(self.box_norm_direction)
-            box_y_hcc = normalize(self.box_view_up)
-            if box_z_hcc is None or box_y_hcc is None:
-                return
-            box_x_hcc = normalize(np.cross(box_y_hcc, box_z_hcc))
-            if box_x_hcc is None:
-                return
-            box_y_hcc = normalize(np.cross(box_z_hcc, box_x_hcc))
-            if box_y_hcc is None:
                 return
 
-        # In observer HCC, +z points toward the observer. Looking from Earth to
-        # the Sun means the view direction points along -HCC.z.
-        view_hcc = np.array([0.0, 0.0, -1.0])
-        up_hcc = np.array([0.0, 1.0, 0.0])
-
-        def to_box_local(v_hcc):
-            return normalize(
-                np.array(
+        def delta_from_focal(ref):
+            try:
+                return np.array(
                     [
-                        float(np.dot(v_hcc, box_x_hcc)),
-                        float(np.dot(v_hcc, box_y_hcc)),
-                        float(np.dot(v_hcc, box_z_hcc)),
-                    ]
+                        float(ref.x.to_value(u.Mm) - focal_point_arr[0]),
+                        float(ref.y.to_value(u.Mm) - focal_point_arr[1]),
+                        float(ref.z.to_value(u.Mm) - (focal_point_arr[2] + float(self.grid_zbase))),
+                    ],
+                    dtype=float,
                 )
-            )
+            except Exception:
+                try:
+                    return np.array(
+                        [
+                            float(ref.x.to_value(u.Mm) - focal_point_arr[0]),
+                            float(ref.y.to_value(u.Mm) - focal_point_arr[1]),
+                            float(ref.z.to_value(u.Mm) - focal_point_arr[2]),
+                        ],
+                        dtype=float,
+                    )
+                except Exception:
+                    return None
 
-        view_local = to_box_local(view_hcc)
-        up_local = to_box_local(up_hcc)
-        if view_local is None or up_local is None:
+        right_local = normalize(delta_from_focal(right_ref_local))
+        up_local = normalize(delta_from_focal(up_ref_local))
+        toward_observer_local = normalize(delta_from_focal(toward_ref_local))
+        if right_local is None or up_local is None or toward_observer_local is None:
             return
+        # Re-orthogonalize to remove transform noise while keeping the observer
+        # WCS as the truth source.
+        right_local = normalize(right_local)
+        up_local = normalize(up_local - np.dot(up_local, right_local) * right_local)
+        if right_local is None or up_local is None:
+            return
+        toward_observer_local = normalize(np.cross(right_local, up_local))
+        if toward_observer_local is None:
+            return
+        up_local = normalize(np.cross(toward_observer_local, right_local))
+        if up_local is None:
+            return
+        view_local = -toward_observer_local
 
+        fov_corners = self._fov_box_corners_local()
+        if isinstance(fov_corners, np.ndarray) and fov_corners.shape == (8, 3):
+            focal_point_arr = np.mean(fov_corners, axis=0)
+
+        scene_span = max(
+            float(self.grid_xmax - self.grid_xmin),
+            float(self.grid_ymax - self.grid_ymin),
+            float(self.grid_zmax - self.grid_zmin),
+            1.0,
+        )
+        camera_distance = 4.0 * scene_span
         focal_point = [
-            0.5 * (self.grid_xmin + self.grid_xmax),
-            0.5 * (self.grid_ymin + self.grid_ymax),
-            0.5 * (self.grid_zmin + self.grid_zmax),
+            float(focal_point_arr[0]),
+            float(focal_point_arr[1]),
+            float(focal_point_arr[2]),
         ]
-        self.camera.up = [up_local[0], up_local[1], up_local[2]]
+        self.camera.up = [float(up_local[0]), float(up_local[1]), float(up_local[2])]
         self.camera.focal_point = focal_point
         self.camera.position = [
-            focal_point[0] - view_local[0],
-            focal_point[1] - view_local[1],
-            focal_point[2] - view_local[2],
+            float(focal_point_arr[0] - view_local[0] * camera_distance),
+            float(focal_point_arr[1] - view_local[1] * camera_distance),
+            float(focal_point_arr[2] - view_local[2] * camera_distance),
         ]
         self.camera.ParallelProjectionOn()
-        self.reset_camera()
-        self.camera.zoom(1.15)
+
+        # Use the FOV box only to control framing in the already-defined LOS
+        # basis. Otherwise fall back to the full model extents.
+        if isinstance(fov_corners, np.ndarray) and fov_corners.shape == (8, 3):
+            centered = np.asarray(fov_corners, dtype=float) - focal_point_arr.reshape((1, 3))
+            half_h = float(np.max(np.abs(centered @ up_local)))
+            half_w = float(np.max(np.abs(centered @ right_local)))
+            try:
+                render_size = self.render_window.GetSize()
+                win_w = max(1, int(render_size[0]))
+                win_h = max(1, int(render_size[1]))
+                aspect = max(1e-6, float(win_w) / float(win_h))
+            except Exception:
+                aspect = 1.0
+            # Use a more generous framing margin so the full projected FOV
+            # rectangle remains visible in LoS parallel view.
+            parallel_scale = max(half_h, half_w / max(aspect, 1e-6), 1e-3) * 1.18
+            self.camera.parallel_scale = parallel_scale
+        else:
+            self.camera.parallel_scale = max(0.5 * scene_span, 1e-3)
+
+        try:
+            self.camera.SetClippingRange(0.1, max(10.0, 10.0 * camera_distance))
+        except Exception:
+            pass
+
         if self.parallel_proj_button is not None:
             self.parallel_proj_button.setChecked(True)
+        self.render()
 
 
     def add_parallel_projection_button(self):
@@ -961,9 +1023,7 @@ class MagFieldViewer(BackgroundPlotter):
         self.base_map_checkbox = QCheckBox("Show Map")
         self.base_map_checkbox.setChecked(False)
         self.base_map_checkbox.setToolTip("Hide or show the selected bottom map while keeping the current map selection.")
-        self.base_map_checkbox.stateChanged.connect(
-            lambda state: (setattr(self, "base_map_visible", state == Qt.Checked), self.update_plot())
-        )
+        self.base_map_checkbox.stateChanged.connect(self.toggle_base_map_visibility)
         base_control_layout.addWidget(self.base_map_checkbox, 3, 0, 1, 2)
 
         self.model_box_checkbox = QCheckBox("Show Model Box")
@@ -2168,9 +2228,6 @@ class MagFieldViewer(BackgroundPlotter):
             scalars=None,
             lighting=False,
         )
-        # The FOV box can be much larger than the red model box.
-        # Reset the camera once when it is turned on so the new actor is framed.
-        self.reset_camera()
         self.render()
 
     def create_streamlines(self, center_x, center_y, center_z, radius, n_points):
@@ -2446,13 +2503,33 @@ class MagFieldViewer(BackgroundPlotter):
         self.slice_visible = state == Qt.Checked
         self.update_plot()
 
+    def toggle_base_map_visibility(self, state):
+        self.base_map_visible = state == Qt.Checked
+        base_map = self.base_map_selector.currentText() if self.base_map_selector is not None else "none"
+        self.update_base_map(
+            base_map,
+            float(self.base_vmin_input.value()) if self.base_vmin_input is not None else -1000.0,
+            float(self.base_vmax_input.value()) if self.base_vmax_input is not None else 1000.0,
+            self.base_map_visible,
+        )
+        self.previous_params["base_map_visible"] = self.base_map_visible
+        self.previous_params["base_map"] = base_map
+        self.reset_camera_clipping_range()
+        self.render()
+
     def toggle_model_box_visibility(self, state):
         self.model_box_visible = state == Qt.Checked
-        self.update_plot()
+        self.update_model_box(self.model_box_visible)
+        self.previous_params["model_box_visible"] = self.model_box_visible
+        self.reset_camera_clipping_range()
+        self.render()
 
     def toggle_fov_box_visibility(self, state):
         self.fov_box_visible = state == Qt.Checked
-        self.update_plot()
+        self.update_fov_box(self.fov_box_visible)
+        self.previous_params["fov_box_visible"] = self.fov_box_visible
+        self.reset_camera_clipping_range()
+        self.render()
 
     def send_streamlines(self):
         """

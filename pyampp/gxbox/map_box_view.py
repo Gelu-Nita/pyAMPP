@@ -58,6 +58,11 @@ _AIA_REFERENCE_IDS = ("171", "193", "211", "304", "335", "1600", "1700", "131", 
 _HMI_VECTOR_DISPLAY_KEYS = {"br", "bp", "bt"}
 _AIA_COLOR_KEYS = {"94", "131", "1600", "1700", "171", "193", "211", "304", "335"}
 _EMBEDDED_REFMAP_FLAG = "PYEMBED"
+_BOX_EDGE_INDEX_PAIRS = (
+    (0, 1), (1, 3), (3, 2), (2, 0),
+    (4, 5), (5, 7), (7, 6), (6, 4),
+    (0, 4), (1, 5), (2, 6), (3, 7),
+)
 
 
 @dataclass
@@ -123,7 +128,7 @@ class MapBoxDisplayWidget(QWidget):
 
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
-        self._svg_dir = Path(__file__).resolve().parents[2] / "docs" / "svg"
+        self._svg_dir = self._resolve_svg_dir()
         self._state: Optional[MapBoxViewState] = None
         self._geometry_change_callback = None
         self._map_summary_cache: dict[str, str] = {}
@@ -283,6 +288,22 @@ class MapBoxDisplayWidget(QWidget):
             btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
         btn.clicked.connect(callback)
         return btn
+
+    @staticmethod
+    def _resolve_svg_dir() -> Path:
+        here = Path(__file__).resolve()
+        candidates = [
+            here.parents[2] / "docs" / "svg",
+            here.parents[1] / "docs" / "svg",
+            Path.cwd() / "docs" / "svg",
+        ]
+        for candidate in candidates:
+            try:
+                if candidate.exists():
+                    return candidate
+            except Exception:
+                continue
+        return candidates[0]
 
     def _make_icon_button(self, icon_names, tooltip, callback, fallback_text="") -> QToolButton:
         btn = QToolButton(self)
@@ -1728,35 +1749,11 @@ class MapBoxDisplayWidget(QWidget):
             fov_rect = self._fov_selection_to_pixel_rect(smap, self._state.fov)
             fx0, fy0 = fov_rect.get_x(), fov_rect.get_y()
             fw, fh = fov_rect.get_width(), fov_rect.get_height()
-            fov_half_w = 0.5 * max(float(self._state.fov.width_arcsec), 1e-3)
-            fov_half_h = 0.5 * max(float(self._state.fov.height_arcsec), 1e-3)
-            fov_bl = SkyCoord(
-                Tx=(self._state.fov.center_x_arcsec - fov_half_w) * u.arcsec,
-                Ty=(self._state.fov.center_y_arcsec - fov_half_h) * u.arcsec,
-                frame=Helioprojective(
-                    observer=getattr(smap, "observer_coordinate", None) or "earth",
-                    obstime=getattr(smap, "date", None),
-                ),
-            )
-            fov_tr = SkyCoord(
-                Tx=(self._state.fov.center_x_arcsec + fov_half_w) * u.arcsec,
-                Ty=(self._state.fov.center_y_arcsec + fov_half_h) * u.arcsec,
-                frame=Helioprojective(
-                    observer=getattr(smap, "observer_coordinate", None) or "earth",
-                    obstime=getattr(smap, "date", None),
-                ),
-            )
-            try:
-                smap.draw_quadrangle(
-                    fov_bl,
-                    top_right=fov_tr,
-                    axes=ax,
-                    edgecolor="deepskyblue",
-                    linestyle="--",
-                    linewidth=0.8,
-                )
-            except Exception:
-                pass
+            for edge in self._fov_box_projected_edges(smap):
+                try:
+                    ax.plot_coord(edge, color="deepskyblue", ls="-", marker="", lw=0.9)
+                except Exception:
+                    continue
 
             # Invisible rectangles retained as the internal geometry extents for
             # button-driven manipulations and Box-FOV calculations.
@@ -2235,6 +2232,34 @@ class MapBoxDisplayWidget(QWidget):
                 visible=False,
             )
         return Rectangle((0.0, 0.0), 10.0, 10.0, visible=False)
+
+    def _fov_box_projected_edges(self, smap) -> list[SkyCoord]:
+        if self._state is None:
+            return []
+        fov_like = self._state.fov_box or self._state.fov
+        if fov_like is None:
+            return []
+        observer = getattr(smap, "observer_coordinate", None) or "earth"
+        obstime = getattr(smap, "date", None)
+        frame_obs = Helioprojective(observer=observer, obstime=obstime)
+        half_w = 0.5 * max(float(fov_like.width_arcsec), 1e-3)
+        half_h = 0.5 * max(float(fov_like.height_arcsec), 1e-3)
+        corners = [
+            SkyCoord(Tx=(float(fov_like.center_x_arcsec) - half_w) * u.arcsec,
+                     Ty=(float(fov_like.center_y_arcsec) - half_h) * u.arcsec,
+                     frame=frame_obs),
+            SkyCoord(Tx=(float(fov_like.center_x_arcsec) + half_w) * u.arcsec,
+                     Ty=(float(fov_like.center_y_arcsec) - half_h) * u.arcsec,
+                     frame=frame_obs),
+            SkyCoord(Tx=(float(fov_like.center_x_arcsec) - half_w) * u.arcsec,
+                     Ty=(float(fov_like.center_y_arcsec) + half_h) * u.arcsec,
+                     frame=frame_obs),
+            SkyCoord(Tx=(float(fov_like.center_x_arcsec) + half_w) * u.arcsec,
+                     Ty=(float(fov_like.center_y_arcsec) + half_h) * u.arcsec,
+                     frame=frame_obs),
+        ]
+        corners = corners + [c for c in corners]
+        return [SkyCoord([corners[i], corners[j]]) for i, j in _BOX_EDGE_INDEX_PAIRS]
 
     def _box_bounds_to_fov_selection(self, box, smap) -> DisplayFovSelection:
         bounds = box.bounds_coords.transform_to(
